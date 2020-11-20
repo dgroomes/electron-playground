@@ -1,0 +1,22 @@
+{
+  "name": "electron-playground",
+  "version": "1.0.0",
+  "description": "📚 Learning and exploring Electron",
+  "main": "index.js",
+  "devDependencies": {
+    "electron": "^11.0.2"
+  },
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dgroomes/electron-playground.git"
+  },
+  "keywords": [
+    "electron"
+  ],
+  "author": "David Groomes",
+  "license": "UNLICENSED",
+  "homepage": "https://github.com/dgroomes/electron-playground"
+}
