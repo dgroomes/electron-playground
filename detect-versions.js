@@ -12,7 +12,10 @@
  * BrowserWindow and specifically scroll down to the "webPreferences" option: https://www.electronjs.org/docs/api/browser-window
  */
 
+console.log("Hello from 'detect-versions.js'");
+
 window.addEventListener('DOMContentLoaded', () => {
+    console.log("Hello from 'detect-versions.js' after 'DOMContentLoaded'");
     {
         let element = document.getElementById(`chrome-version`);
         let version = process.versions['chrome'];

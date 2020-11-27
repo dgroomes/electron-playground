@@ -1,3 +1,8 @@
+/**
+ * This file is the entrypoint of the Electron application. By contrast, "app.js" is the primary source of JavaScript
+ * for the web page itself.
+ */
+
 const {app, BrowserWindow} = require('electron')
 const path = require('path')
 
