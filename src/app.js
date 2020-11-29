@@ -10,19 +10,23 @@
 window.addEventListener('DOMContentLoaded', () => {
     {
         let element = document.getElementById(`chrome-version`);
-        let version = window.myData.chromeVersion;
+        let version = window.detectVersions.chromeVersion;
         element.innerText = `Version: ${version}`;
     }
 
     {
         let element = document.getElementById(`node-version`);
-        let version = window.myData.nodeVersion;
+        let version = window.detectVersions.nodeVersion;
         element.innerText = `Version: ${version}`;
     }
 
     {
         let element = document.getElementById(`electron-version`);
-        let version = window.myData.electronVersion;
+        let version = window.detectVersions.electronVersion;
         element.innerText = `Version: ${version}`;
     }
+});
+
+window.messagePassing.registerCallbackForMessages( (message) => {
+    console.log(`Received a message: ${message}`);
 });
