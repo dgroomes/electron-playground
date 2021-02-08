@@ -4,7 +4,7 @@
   "description": "📚 Learning and exploring Electron",
   "main": "src/index.js",
   "devDependencies": {
-    "electron": "^11.0.2"
+    "electron": "^11.2.3"
   },
   "scripts": {
     "start": "electron src/"
