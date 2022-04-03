@@ -1,6 +1,6 @@
-/**
- * Illustrating message passing between the main process and a renderer process.
- */
+/*
+Illustrating message passing between the main process and a renderer process.
+*/
 
 const {contextBridge} = require('electron');
 
