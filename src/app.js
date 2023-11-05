@@ -5,23 +5,23 @@ environment.
 */
 
 /**
- * When the DOM is loaded then paint the environmental version information.
+ * When the DOM is loaded paint the environmental version information.
  */
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener("DOMContentLoaded", () => {
     {
-        let element = document.getElementById(`chrome-version`);
+        let element = document.getElementById("chrome-version");
         let version = window.detectVersions.chromeVersion;
         element.innerText = `Version: ${version}`;
     }
 
     {
-        let element = document.getElementById(`node-version`);
+        let element = document.getElementById("node-version");
         let version = window.detectVersions.nodeVersion;
         element.innerText = `Version: ${version}`;
     }
 
     {
-        let element = document.getElementById(`electron-version`);
+        let element = document.getElementById("electron-version");
         let version = window.detectVersions.electronVersion;
         element.innerText = `Version: ${version}`;
     }

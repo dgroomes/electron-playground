@@ -4,10 +4,10 @@ process/Chromium. Read about the "contextBridge" at https://www.electronjs.org/d
 https://www.electronjs.org/docs/api/context-bridge
 */
 
-const {contextBridge} = require('electron');
+const {contextBridge} = require("electron");
 
 contextBridge.exposeInMainWorld("detectVersions", {
-    chromeVersion: process.versions['chrome'],
-    nodeVersion: process.versions['node'],
-    electronVersion: process.versions['electron']
+    chromeVersion: process.versions["chrome"],
+    nodeVersion: process.versions["node"],
+    electronVersion: process.versions["electron"]
 });

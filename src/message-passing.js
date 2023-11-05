@@ -2,7 +2,7 @@
 Illustrating message passing between the main process and a renderer process.
 */
 
-const {contextBridge} = require('electron');
+const {contextBridge} = require("electron");
 
 let callback = null;
 
@@ -10,7 +10,7 @@ let callback = null;
  * Define a function that can be used by a renderer process to register a callback.
  *
  * I'm not quite sure this is the "right way" to do this. This is a pretty circuitous way to wire up the renderer
- * process to receive messages from the main process, but it works and it uses the contextBridge (a good security
+ * process to receive messages from the main process, but it works, and it uses the contextBridge (a good security
  * practice, so it seems)
  *
  * What is the recommended way to message pass from the main process to the renderer process? It seems there is
