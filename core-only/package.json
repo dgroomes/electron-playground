@@ -1,7 +1,7 @@
 {
-  "name": "electron-playground",
+  "name": "electron-playground_core-only",
   "version": "1.0.0",
-  "description": "📚 Learning and exploring Electron",
+  "description": "A simple Electron app that showcases core APIs and nothing else.",
   "main": "src/index.js",
   "devDependencies": {
     "electron": "22.3.23"

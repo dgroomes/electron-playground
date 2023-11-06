@@ -9,47 +9,30 @@
 
 ## Overview
 
-This is a simple Electron app I use as a working example for my own reference. It is adapted from the official Electron
-quick-start app <https://github.com/electron/electron-quick-start>.
+This repository is for me to learn and explore Electron using runnable example programs.
 
 
-## Instructions
+## Standalone Subprojects
 
-Follow these instructions to build and run the app.
+This repository illustrates different concepts, patterns and examples via standalone subprojects. Each subproject is
+completely independent of the others and do not depend on the root project. This _standalone subproject constraint_
+forces the subprojects to be complete and maximizes the reader's chances of successfully running, understanding, and
+re-using the code.
 
-1. Pre-requisite: Node.js
-   * I used Node v20
-2. Install dependencies:
-   * ```shell
-     npm install
-     ```
-3. Run the app:
-   * ```shell
-     npm start
-     ```
-   * Success! It should look something like this:
+The subprojects include:
 
-     ![screenshot](screenshot.png)
+
+### `core-only/`
+
+This subproject shows how to use [`jlink`](https://openjdk.java.net/jeps/282) on a non-modular Java Gradle project to make a reduced-size JRE image for a lower memory footprint and faster startup!
+
+See the README in [core-only/](core-only/).
 
 
 ## Wish List
 
 General clean-ups, TODOs and things I wish to implement for this project:
 
-* [x] DONE How does the "preload" lifecycle work exactly? How does ipc work? How do Web Workers work? I'd like to try injecting
-  the version data using one of these methods instead of what I'm doing in the `detect-versions.js` script.  
-* [x] DONE Send a message from the mainProcess to the renderer process
-* [x] DONE Upgrades and fix for failing preload script (Electron 20 change I think)
-* [ ] Revisit the `nodeIntegration: true` configuration. I needed this after migrating from Electron 18 to 22 because
-  ["sandbox mode" is enabled by default starting in 20](https://www.electronjs.org/docs/latest/tutorial/sandbox). I'm not
-  sure if I really need "node integration" or if I can get away with sandbox mode disabled, or even better yet, there is
-  a more secure/idiomatic way to detect environment/platform versions like Node/Chromium/Electron and pass these values
-  to the frontend (I bet there is).
-
-
-## Reference
-
-* [Electron official site: Tutorial on "Context Isolation"](https://www.electronjs.org/docs/tutorial/context-isolation)
-* [StackOverflow answer about "preload" scripts](https://stackoverflow.com/a/59814127)
-* [Electron official site: API for "BrowserWindow"](https://www.electronjs.org/docs/api/browser-window)
-* [Electron official site: API for "webContents" and sending messages](https://www.electronjs.org/docs/api/web-contents#contentssendchannel-args)
+* [ ] Add a subproject that uses [Electron Forge](https://github.com/electron/forge). This is an official Electron project
+  and perhaps is the recommended way to scaffold and build your project. Does it handle hot reloading? Let's find out!
+  Stay vigilant though. If it turns out to be too complicated or flaky, it's valid to not recommend using it.
