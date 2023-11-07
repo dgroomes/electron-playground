@@ -47,7 +47,8 @@ General clean-ups, TODOs and things I wish to implement for this project:
 * [x] DONE Turn this into a multi-project repository. Turn the existing example into a "barebones" subproject because it is
   a good example of the foundational/core APIs of Electron and does not contain much incidental complexity like a
   build/bundle step or even downloading any dependencies (nice!)
-* [ ] Can we use `.mjs` files? I want to use ESM `import` node CommonJS `require`.
+* [ ] Upgrade to ESM instead of CommonJS once Electron 28 is released (this long-awaited feature was implemented in 28
+  is available in beta).
 
 
 ## Reference
