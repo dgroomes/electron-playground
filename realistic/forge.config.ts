@@ -24,8 +24,20 @@ const config: ForgeConfig = {
     plugins: [
         new WebpackPlugin({
             mainConfig,
-            // https://stackoverflow.com/a/73768719
-            devContentSecurityPolicy: "default-src 'self' 'unsafe-eval' 'unsafe-inline' static: http: https: ws:",
+            // The Content Security Policy is a useful security feature of browser pages, including in Electron apps.
+            // Learn more it at the following links:
+            //
+            // - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
+            // - https://github.com/electron/electron/issues/19775
+            //
+            // During development time, I think we need a less strict policy for loading the 'index.css' file (I'm not
+            // really sure why this happens only at dev-time and not when I run the application bundle...). I get the
+            // following error in the logs:
+            //
+            //     Refused to load the stylesheet 'static://index.css' because it violates the following Content Security Policy directive ...
+            //
+            // To work around this, the Forge config lets us specify a dev-only policy. I'm using one I got from https://stackoverflow.com/a/73768719
+            devContentSecurityPolicy: "default-src 'self' static: http: https: ws: static:",
             renderer: {
                 config: rendererConfig,
                 entryPoints: [

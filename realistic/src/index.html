@@ -2,14 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
-
-    <!--  TODO research the idiomatic thing to do for the Content Security Policy in an Electron Forge app. It seems
-    like Forge uses some dynamic eval stuff during development time, and I haven't figured it out exactly. See https://github.com/electron/forge/issues/2331
-    So, we'll use the unsafe policy for now but there really ought to be a way to specify a stricter policy for production.
-    Read about Content Security Policies at https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
-    and specifically for Electron apps, read about guidance at https://github.com/electron/electron/issues/19775 -->
-    <!--    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">-->
-
     <title>electron-playground/realistic</title>
     <link rel="stylesheet" href="static://index.css"/>
 </head>
