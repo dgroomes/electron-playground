@@ -72,7 +72,8 @@ General clean-ups, TODOs and things I wish to implement for this project:
 * [x] DONE `import` in `.ts` files never `require`.
 * [x] DONE Consider converting `webpack-copy-plugin` to TS.
 * [x] DONE Revisit the Content Security Policy stuff. Does the Forge webpack plugin do that for us? 
-* [ ] React? React devtools? How do devtools/plugins work in Electron? 
+* [x] DONE React
+* [ ] React devtools? How do devtools/plugins work in Electron? 
 * [x] DONE Instructions for packaging and installing.
 * [ ] Maybe use something like trpc to talk between the main process and renderer process?
 * [ ] Custom icon (`.ico`). How do you create one? SVG?

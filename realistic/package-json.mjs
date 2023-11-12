@@ -27,6 +27,10 @@ const versions = {
     // declared as a peer dependency). You need to be careful when selecting the version. ts-node is needed by rechoir,
     // which is used to transpile TypeScript-based build scripts like 'forge.config.ts'.
     tsNode: "^10.9.1",
+
+    react: "^18.2.0", // React releases: https://legacy.reactjs.org/versions
+    reactTypes: "^18.2.37", // @types/react releases: https://www.npmjs.com/package/@types/react
+    reactDomTypes: "^18.2.15", // @types/react-dom releases: https://www.npmjs.com/package/@types/react-dom
 };
 
 // Define a package.json structure using an object.
@@ -42,6 +46,8 @@ const packageJsonContent = {
     },
     license: "UNLICENSED",
     dependencies: {
+        "react": versions.react,
+        "react-dom": versions.react,
     },
     devDependencies: {
         "@electron-forge/cli": versions.electronForge,
@@ -63,6 +69,8 @@ const packageJsonContent = {
         "ts-node": versions.tsNode,
 
         typescript: versions.typescript,
+        "@types/react": versions.reactTypes,
+        "@types/react-dom": versions.reactDomTypes,
     },
 };
 

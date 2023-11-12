@@ -8,7 +8,10 @@
     "make": "electron-forge make"
   },
   "license": "UNLICENSED",
-  "dependencies": {},
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
   "devDependencies": {
     "@electron-forge/cli": "^6.4.2",
     "@electron-forge/maker-dmg": "^6.4.2",
@@ -16,6 +19,8 @@
     "electron": "^27.0.4",
     "ts-loader": "^9.5.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.2"
+    "typescript": "^5.2",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15"
   }
 }
