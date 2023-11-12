@@ -1,0 +1,4 @@
+node_modules/
+.webpack/
+# Electron Forge puts the packaged files in 'out/'
+out/

@@ -24,15 +24,22 @@ The subprojects include:
 
 ### `core-only/`
 
-This subproject shows how to use [`jlink`](https://openjdk.java.net/jeps/282) on a non-modular Java Gradle project to make a reduced-size JRE image for a lower memory footprint and faster startup!
+A simple Electron app that showcases core APIs and nothing else.
 
 See the README in [core-only/](core-only/).
+
+
+### `realistic/`
+
+A demo Electron app showing a realistic project setup supported tooling like [Electron Forge](https://github.com/electron/forge).
+
+See the README in [realistic/](realistic/).
 
 
 ## Wish List
 
 General clean-ups, TODOs and things I wish to implement for this project:
 
-* [ ] Add a subproject that uses [Electron Forge](https://github.com/electron/forge). This is an official Electron project
+* [x] DONE Add a subproject that uses [Electron Forge](https://github.com/electron/forge). This is an official Electron project
   and perhaps is the recommended way to scaffold and build your project. Does it handle hot reloading? Let's find out!
   Stay vigilant though. If it turns out to be too complicated or flaky, it's valid to not recommend using it.
