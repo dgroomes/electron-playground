@@ -70,7 +70,7 @@ General clean-ups, TODOs and things I wish to implement for this project:
 * [x] DONE (No we need it) Can I not use `ts-node` and just use `tsc`? Again, we want to reduce dependencies.
 * [x] DONE Comment all the extra webpack deps. Do we really need to explicitly declare a dependency on them? Why doesn't the
 * [x] DONE `import` in `.ts` files never `require`.
-* [ ] Consider converting `webpack-copy-plugin` to TS.
+* [x] DONE Consider converting `webpack-copy-plugin` to TS.
 * [ ] Revisit the Content Security Policy stuff
   Forge webpack plugin do that for us? 
 * [ ] React? React devtools? How do devtools/plugins work in Electron? 

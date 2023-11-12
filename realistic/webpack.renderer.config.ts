@@ -1,6 +1,6 @@
 import type {Configuration} from "webpack";
 import {rules} from "./webpack.rules";
-import WebpackCopyPlugin from "./webpack-copy-plugin";
+import {WebpackCopyPlugin} from "./webpack-copy-plugin";
 
 export const rendererConfig: Configuration = {
     module: {
