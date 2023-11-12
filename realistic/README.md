@@ -73,7 +73,7 @@ General clean-ups, TODOs and things I wish to implement for this project:
 * [x] DONE Consider converting `webpack-copy-plugin` to TS.
 * [x] DONE Revisit the Content Security Policy stuff. Does the Forge webpack plugin do that for us? 
 * [x] DONE React
-* [ ] React devtools? How do devtools/plugins work in Electron? 
+* [ ] HOLD (Manifest v3 plugins don't totally work in Electron. There is progress though. See <https://github.com/electron/electron/issues/37876#issuecomment-1795774611>) React devtools? How do devtools/plugins work in Electron? 
 * [x] DONE Instructions for packaging and installing.
 * [ ] Maybe use something like trpc to talk between the main process and renderer process?
 * [ ] Custom icon (`.ico`). How do you create one? SVG?
