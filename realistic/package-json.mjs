@@ -42,6 +42,11 @@ const packageJsonContent = {
     main: ".webpack/main",
     scripts: {
         start: "electron-forge start",
+
+        // Start the app in a configuration that will connect to the external/standalone React Developer Tools instance.
+        // You must have already started the React Developer Tools app before running this command.
+        "start:react-devtools": "ELECTRON_PLAYGROUND_CONNECT_TO_REACT_DEVTOOLS=true electron-forge start",
+
         package: "electron-forge package",
         make: "electron-forge make",
     },

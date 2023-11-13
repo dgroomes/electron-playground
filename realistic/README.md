@@ -1,7 +1,5 @@
 # realistic
 
-NOT YET FULLY IMPLEMENTED
-
 A demo Electron app showing a realistic project setup supported tooling like [Electron Forge](https://github.com/electron/forge).
 
 > A complete tool for building modern Electron applications.
@@ -46,6 +44,39 @@ Follow these instructions to build and run the app.
     * You will then need to find the `.dmg` file in the `out` directory and install it.
 
 
+## Instructions for React DevTools
+
+When you develop a React application, you'll likely want the power of the excellent [React Developer Tools](https://react.dev/learn/react-developer-tools)
+which helps you see the React component tree and inspect the props and state of each component. Usually, we use this as
+a browser extension. Unfortunately, in an Electron environment in 2023 we don't have that option because of the after-effects
+of the Manifest V3 and rightful challenges to implementing it in projects like Electron. See these discussions for more
+information:
+
+* [`electron/electron` GitHub issue #37876: *[Bug] chrome.scripting API not implemented for extensions using Manifest V3*](https://github.com/electron/electron/issues/37876)
+* [`electron/electron` GitHub issue #36545: *[Bug] Failed to load React Devtools*](https://github.com/electron/electron/issues/36545)
+* [`facebook/react` GitHub issue #25843: *[DevTools Bug]: Electron support broken in 4.27*](https://github.com/facebook/react/issues/25843)
+
+Fortunately, React Developer Tools is designed to run in many different environments. We just have to eject from our
+normal expectation of using it as a browser extension and instead run it in a "standalone" mode, as suggested by [this
+StackOverflow answer](https://stackoverflow.com/a/74330841) which points to the (very nice) documentation in the [`react-devtools` package](https://github.com/facebook/react/tree/main/packages/react-devtools#usage-with-react-dom).
+It's a bit circuitous, because the standalone React Developer Tools is itself an Electron app, but it works.
+
+Follows these instructions to install and run React Developer Tools in standalone mode and connect it to from our app:
+
+1. Install React Developer Tools globally:
+   * ```shell
+     npm install -g react-devtools
+     ```
+2. Run React Developer Tools in standalone mode:
+   * ```shell
+     react-devtools
+     ```
+3. Run our app but with a special flag to connect to the standalone React Developer Tools:
+   * ```shell
+     npm run start:react-devtools
+     ```
+
+
 ## Notes
 
 https://www.electronforge.io/config/plugins/webpack
@@ -73,7 +104,14 @@ General clean-ups, TODOs and things I wish to implement for this project:
 * [x] DONE Consider converting `webpack-copy-plugin` to TS.
 * [x] DONE Revisit the Content Security Policy stuff. Does the Forge webpack plugin do that for us? 
 * [x] DONE React
-* [ ] HOLD (Manifest v3 plugins don't totally work in Electron. There is progress though. See <https://github.com/electron/electron/issues/37876#issuecomment-1795774611>) React devtools? How do devtools/plugins work in Electron? 
+* [x] DONE Use React devtools. How do devtools/plugins work in Electron?
+    * The browser extension does not work. Manifest v3 plugins don't totally work in Electron. There is progress though. See <https://github.com/electron/electron/issues/37876#issuecomment-1795774611>)
+    * DONE There is an interesting alternative though, which ejects from the extension and just runs React DevTools in "standalone"
+    way: <https://github.com/electron/electron/issues/36545#issuecomment-1652665436>.
+    * DONE Pass a flag somehow so that the `localhost:8097` script gets loaded.
 * [x] DONE Instructions for packaging and installing.
 * [ ] Maybe use something like trpc to talk between the main process and renderer process?
 * [ ] Custom icon (`.ico`). How do you create one? SVG?
+* [ ] Consider using `electron-packager` directly instead of using `electron-forge`. I don't like the lack of accessibility
+  to the `HtmlWebpackPlugin` options, and also I'm not using many of the features of Forge I think? The fewer dependencies
+  the better for understanding.

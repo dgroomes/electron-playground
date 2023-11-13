@@ -4,6 +4,7 @@
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",
+    "start:react-devtools": "ELECTRON_PLAYGROUND_CONNECT_TO_REACT_DEVTOOLS=true electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make"
   },
