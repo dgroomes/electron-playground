@@ -1,6 +1,6 @@
 # realistic
 
-A demo Electron app showing a realistic project setup supported tooling like [Electron Forge](https://github.com/electron/forge).
+A demo Electron app showing a realistic project setup supported by tooling like [Electron Forge](https://github.com/electron/forge) and webpack.
 
 > A complete tool for building modern Electron applications.
 > 
@@ -12,15 +12,15 @@ A demo Electron app showing a realistic project setup supported tooling like [El
 
 ## Overview
 
+**NOTE**: This project was developed on macOS. It is for my own personal use.
+
 Electron applications are full-fledged desktop applications, and as such, entail a lot of building and packaging work
 to take your application from conception to the hands of end users. Electron Forge is an official subproject of Electron
-that is designed to make this process easier (or in my hope, at least serve as a rich example).
+that is designed to make the building, serving and packaging process easy. I think it's the right tool for the job. I'm
+also using webpack in this project, which I think is a natural choice because Electron and webpack are both part of the
+[OpenJS Foundation](https://openjsf.org/).
 
-This project is me learning Electron Forge. I scaffolded this project using `npx create-electron-app` and I've adapted
-it from there. I later learned that there richer scaffolding options and these would have suited me better. For example,
-in another directory, I tried `npm init electron-app@latest my-temp-project -- --template=webpack-typescript`.
-
-**NOTE**: This project was developed on macOS. It is for my own personal use.
+This project is me learning the supporting tooling that it takes to develop and build a realistic Electron application.
 
 
 ## Instructions
@@ -112,6 +112,15 @@ General clean-ups, TODOs and things I wish to implement for this project:
 * [x] DONE Instructions for packaging and installing.
 * [ ] Maybe use something like trpc to talk between the main process and renderer process?
 * [ ] Custom icon (`.ico`). How do you create one? SVG?
-* [ ] Consider using `electron-packager` directly instead of using `electron-forge`. I don't like the lack of accessibility
-  to the `HtmlWebpackPlugin` options, and also I'm not using many of the features of Forge I think? The fewer dependencies
-  the better for understanding.
+* [ ] Consider dropping Electron Forge's webpack plugin. Try to make my own (we're still going to lean on Webpack heavily)
+    * I don't like the lack of accessibility to the `HtmlWebpackPlugin` options (I describe this in code comments).
+    * I do need and like Forge for creating the `.dmg`. I looked into using Electron Packager directory and dropping
+      Forge altogether but Packager doesn't really want to be used directly and I don't want to try. I estimate a couple
+      hundred lines of code/config/comments which I don't want to do.
+* [ ] Hot reloading isn't working. When I change the `index.css` file it should hot reload.
+
+
+## Reference
+
+* [Electron Packager](https://github.com/electron/packager)
+  * > Electron Packager is a command line tool and Node.js library that bundles Electron-based application source code with a renamed Electron executable and supporting files into folders ready for distribution.

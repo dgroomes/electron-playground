@@ -31,7 +31,7 @@ See the README in [core-only/](core-only/).
 
 ### `realistic/`
 
-A demo Electron app showing a realistic project setup supported tooling like [Electron Forge](https://github.com/electron/forge).
+A demo Electron app showing a realistic project setup supported by tooling like [Electron Forge](https://github.com/electron/forge) and webpack.
 
 See the README in [realistic/](realistic/).
 
