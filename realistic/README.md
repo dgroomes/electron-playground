@@ -112,6 +112,8 @@ General clean-ups, TODOs and things I wish to implement for this project:
 * [x] DONE Instructions for packaging and installing.
 * [ ] Maybe use something like trpc to talk between the main process and renderer process?
 * [ ] Custom icon (`.ico`). How do you create one? SVG?
+* [x] DONE Debug logging. Forge is not showing me any webpack logs. This is a problem because I want to develop my own Forge
+  plugin that uses webpack, but I need the logging feedback so I can have a hope at learning webpack dev.
 * [ ] Consider dropping Electron Forge's webpack plugin. Try to make my own (we're still going to lean on Webpack heavily)
     * I don't like the lack of accessibility to the `HtmlWebpackPlugin` options (I describe this in code comments).
     * I do need and like Forge for creating the `.dmg`. I looked into using Electron Packager directory and dropping
