@@ -25,38 +25,6 @@ const createWindow = async () => {
 };
 
 /**
- * Create a custom protocol to serve static resources like 'index.css' to the browser window.
- *
- * In an Electron app built with webpack, it's common to become stuck in a "how do I load my static assets" quagmire.
- * This is, in part, because of the runtime difference between running the app during development (webpack server) versus
- * running the app in production (an Electron bundle).
- *
- * For useful background and solution ideas, see these discussions:
- *
- * - https://github.com/electron/forge/issues/1592#issue-589865634
- * - https://stackoverflow.com/a/73768719
- * - https://gist.github.com/bbudd/2a246a718b7757584950b4ed98109115
- *
- * Our solution is to invent a 'static://' protocol that the client (the web page) can use to request static resources
- * from the Electron 'main' process. For example, in the 'index.html' file, there would be a line like this:
- * <pre>
- *     <link rel="stylesheet" href="static://index.css"/>
- * </pre>
- *
- * This isn't necessarily an idiomatic solution, but I think it's understandable. By contrast, see the idea in this
- * StackOverflow answer which describes more of a webpack-centric solution https://stackoverflow.com/questions/47996190/how-does-html-webpack-plugin-work-with-html-loader/56918191#56918191
- * I personally want to stay away from third-party packages, like 'html-loader', unless I really understand what they
- * are doing. For me, the 'static://' protocol is something I can wrap my head around.
- */
-function createStaticProtocol() {
-    session.defaultSession.protocol.handle("static", (request) => {
-        const fileUrl = request.url.replace("static://", "");
-        const filePath = path.join(app.getAppPath(), ".webpack/renderer", fileUrl); // do we need to make sure this is a safe path?
-        return net.fetch("file://" + filePath);
-    });
-}
-
-/**
  * Install DevTools extensions like React Developer Tools. Unfortunately, manifest v3 has caused some problems with
  * extensions. React has adopted manifest v3 (good) but Electron has not quite caught up with (ok, because v3 is actually
  * pretty aggressive). But there is progress, follow this GitHub issue for status: https://github.com/electron/electron/issues/37876
@@ -72,6 +40,5 @@ async function installDevToolsPlugins() {
 
 app.on("ready", async () => {
     // await installDevToolsPlugins(); Follow the GitHub issue above for status on this.
-    createStaticProtocol();
     await createWindow();
 });

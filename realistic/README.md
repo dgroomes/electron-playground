@@ -117,7 +117,9 @@ General clean-ups, TODOs and things I wish to implement for this project:
     * I do need and like Forge for creating the `.dmg`. I looked into using Electron Packager directory and dropping
       Forge altogether but Packager doesn't really want to be used directly and I don't want to try. I estimate a couple
       hundred lines of code/config/comments which I don't want to do.
-* [ ] Hot reloading isn't working. When I change the `index.css` file it should hot reload.
+* [x] DONE Hot reloading for styles isn't working. That's totally my bad, I knew this and took out the style loader hastily.
+  When I change the `index.css` file, the styles should update in the app without a refresh. This is a basic feature
+  for a realistic project.
 
 
 ## Reference
