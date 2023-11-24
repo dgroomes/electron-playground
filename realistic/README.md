@@ -133,14 +133,16 @@ General clean-ups, TODOs and things I wish to implement for this project:
     * DONE Abstract a `watchWebpackPromisified` function similar to the `runWebpackPromisified` function.
     * DONE Register convenient shutdown handler when Electron process exits
     * What's the 'packageAfterCopy' hook for? (Update: not sure but seems like it doesn't matter)
-* [ ] Drop the `WebpackConfig.ts` code and use my own webpack config (this is phase 2 of the overall custom plugin)
+* [ ] SKIP Drop the `WebpackConfig.ts` code and use my own webpack config (this is phase 2 of the overall custom plugin)
+    * Update: maybe I won't do this. The AssetRelocatorPatch is a particularly nasty implementation detail. I don't want
+      to maintain that.
     * What is AssetRelocatorPatch (used in the main entrypoint)?
     * What is ExternalsPlugin (used in the preload entrypoint)?
 * [ ] Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.
 * [x] DONE Hot reloading for styles isn't working. That's totally my bad, I knew this and took out the style loader hastily.
   When I change the `index.css` file, the styles should update in the app without a refresh. This is a basic feature
   for a realistic project.
-* [ ] Remove WebpackRecoverStatsAndInfraLoggingConfigPlugin when we're confident we're completely done with the Forge
+* [x] DONE Remove WebpackRecoverStatsAndInfraLoggingConfigPlugin when we're confident we're completely done with the Forge
   webpack plugin.
 * [ ] De-scope `ts-node` and the TS-based config files. While I really like the ability to author the Forge and webpack
   config files in TypeScript, it comes with extra build-time complexity that I don't want to pay for, especially in this

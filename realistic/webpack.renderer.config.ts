@@ -1,6 +1,5 @@
 import type {Configuration} from "webpack";
 import {rules} from "./webpack.rules";
-import {WebpackRecoverStatsAndInfraLoggingConfigPlugin} from "./WebpackRecoverStatsAndInfraLoggingConfigPlugin";
 
 export const rendererConfig: Configuration = {
     plugins: [],
@@ -36,8 +35,3 @@ export const rendererConfig: Configuration = {
         extensions: [".js", ".ts", ".jsx", ".tsx", ".css"],
     },
 };
-
-rendererConfig.plugins.push(new WebpackRecoverStatsAndInfraLoggingConfigPlugin({
-    stats: rendererConfig.stats,
-    infrastructureLogging: rendererConfig.infrastructureLogging
-}));
