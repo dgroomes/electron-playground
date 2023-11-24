@@ -114,14 +114,40 @@ General clean-ups, TODOs and things I wish to implement for this project:
 * [ ] Custom icon (`.ico`). How do you create one? SVG?
 * [x] DONE Debug logging. Forge is not showing me any webpack logs. This is a problem because I want to develop my own Forge
   plugin that uses webpack, but I need the logging feedback so I can have a hope at learning webpack dev.
-* [ ] Consider dropping Electron Forge's webpack plugin. Try to make my own (we're still going to lean on Webpack heavily)
+* [x] DONE Drop Electron Forge's webpack plugin (phase 1). Try to make my own (we're still going to lean on Webpack heavily)
     * I don't like the lack of accessibility to the `HtmlWebpackPlugin` options (I describe this in code comments).
     * I do need and like Forge for creating the `.dmg`. I looked into using Electron Packager directory and dropping
       Forge altogether but Packager doesn't really want to be used directly and I don't want to try. I estimate a couple
       hundred lines of code/config/comments which I don't want to do.
+    * DONE Stop using the plugin but keep using Electron Forge's `WebpackConfig.ts` code. This is an iterative approach.
+      * DONE Race condition. I need to wait for the bundle to be created before Forge invokes Electron. I need to not return
+        `false` from the startLogic function I think. UPDATE: we should do the "two webpack compiler" design that the
+        Electron Forge webpack plugin does. It doesn't make sense to have the webpack-dev-server even be related to the
+        main process bundling, and especially so because I just don't see any extension/hooks. I briefly looked at the
+        webpack-dev-server middleware but using that directly sheds too much of the normal webpack-dev-server functionality
+        (at least, thousands of lines of code which I assume I at least need/want some of that).
+      * DONE What is the "asset size limit" warning? 
+      * DONE Fix serving problem (missing the port config)
+    * DONE Can we do initialization work in an early hook?
+    * DONE Get `package` to work. This is when I need to get into Forge's hooks.
+    * DONE Abstract a `watchWebpackPromisified` function similar to the `runWebpackPromisified` function.
+    * DONE Register convenient shutdown handler when Electron process exits
+    * What's the 'packageAfterCopy' hook for? (Update: not sure but seems like it doesn't matter)
+* [ ] Drop the `WebpackConfig.ts` code and use my own webpack config (this is phase 2 of the overall custom plugin)
+    * What is AssetRelocatorPatch (used in the main entrypoint)?
+    * What is ExternalsPlugin (used in the preload entrypoint)?
+* [ ] Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.
 * [x] DONE Hot reloading for styles isn't working. That's totally my bad, I knew this and took out the style loader hastily.
   When I change the `index.css` file, the styles should update in the app without a refresh. This is a basic feature
   for a realistic project.
+* [ ] Remove WebpackRecoverStatsAndInfraLoggingConfigPlugin when we're confident we're completely done with the Forge
+  webpack plugin.
+* [ ] De-scope `ts-node` and the TS-based config files. While I really like the ability to author the Forge and webpack
+  config files in TypeScript, it comes with extra build-time complexity that I don't want to pay for, especially in this
+  project because this is an Electron demo and not a Node "custom module loader for an alternative language" demo.
+  I'm really glad I got to learn and use these concepts (`ts-node`, and rechoir, [Node module loaders and hooks](https://nodejs.org/api/module.html#customization-hooks))
+  but now I can de-scope that stuff into a separate project. I don't really want to have the webpack-util or MyForgeWebpackPlugin
+  be in the JS though... can I extract it into a sibling npm project/module and then 'link' it or 'pack' it?
 
 
 ## Reference

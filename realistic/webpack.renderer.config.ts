@@ -19,6 +19,13 @@ export const rendererConfig: Configuration = {
             }
         ],
     },
+    performance: {
+        // During development, the bundle size exceeds a default webpack configuration which exists as a "performance
+        // hint". This is annoying because it's not actionable. The bundle is so large because we're using style-loader
+        // and other things and somehow this gets over 250KiB (I'm surprised by that). But this is a normal/mainstream
+        // setup, so we consider the warning message a false alarm. Turn it off. See the related discussion: https://github.com/webpack/webpack/issues/3486
+        hints: false
+    },
 
     // Let's use 'source-map' instead of the default behavior which uses 'eval'. When 'eval' is used, then we need to
     // relax the Content-Security-Policy rule to allow 'unsafe-eval'. This is not a great trade-off in my case, because

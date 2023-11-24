@@ -91,7 +91,7 @@ const packageJsonContent = {
 };
 
 // Convert to a formatted JSON string.
-const packageJsonString = JSON.stringify(packageJsonContent, null, 2);
+const packageJsonString = JSON.stringify(packageJsonContent, null, 2) + "\n";
 
 // Write the 'package.json' file to disk.
 fs.writeFile("package.json", packageJsonString, (err) => {

@@ -3,6 +3,7 @@ import {MakerDMG} from "@electron-forge/maker-dmg";
 import {WebpackPlugin} from "@electron-forge/plugin-webpack";
 import {mainConfig} from "./webpack.main.config";
 import {rendererConfig} from "./webpack.renderer.config";
+import {MyForgeWebpackPlugin} from "./MyForgeWebpackPlugin";
 
 /**
  * This is one piece in the puzzle of our integration to React Developer Tools. See the related note in the README.
@@ -24,6 +25,51 @@ function htmlEntrypoint(): string {
     }
 }
 
+let webpackPluginConfig = {
+    mainConfig,
+    // The Content Security Policy (CSP) is a useful security feature of browser pages, including in Electron apps.
+    // Learn more it at the following links:
+    //
+    // - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
+    // - https://github.com/electron/electron/issues/19775
+    //
+    // We need to include 'ws:' because webpack uses WebSockets for reloading changed resources. This feature
+    // is called Hot Module Reloading (HMR).
+    //
+    // We need 'unsafe-inline' for styles, because the effect of webpack's 'style-loader' is that the web page
+    // applies its styles by some JavaScript code that appends a '<style>' element to the '<head>' element. To me,
+    // this is NOT inline styles, it's just an internal style sheet. Inline styles would be setting the style
+    // attribute on individual elements. So, I'm pretty confused. Also, in the same surprising spirit, even with
+    // a seemingly conservative CSP, you can still set styles via the CSS object model in JavaScript (see https://stackoverflow.com/q/36870421).
+    // So, I haven't really figured out this CSP thing, but I'm leaving this note to at least preserve some basic
+    // understanding.
+    //
+    // Specifically, without the CSP I get the error message:
+    //
+    //     Refused to apply inline style because it violates the following Content Security Policy (insertBySelector.js:32)
+    //
+    // And when I put a breakpoint at this line, I can tell it's trying to add a 'style' element to the 'head'
+    // element. Again, this is NOT an inline style. And I can't find any language in MDN that defines inline
+    // styles, but if I dig through to the CSP specs and proposals I would eventually find some logic.
+    devContentSecurityPolicy: "default-src 'self' http: https: ws:; style-src-elem 'self' 'unsafe-inline'",
+    renderer: {
+        config: rendererConfig,
+        // Entry points are an Electron Forge concept but they closely resemble webpack 'Entry' objects.
+        // You might have multiple entrypoints if say you're product has a "new UI" and an "old UI". Or maybe
+        // you just have a multipage application with pages like "/home", "/about", "/contact", and you handle
+        // page transitions from the electron main process.
+        entryPoints: [
+            {
+                name: "main_window",
+                html: htmlEntrypoint(),
+                js: "./src/renderer.tsx",
+                preload: {
+                    js: "./src/preload.ts",
+                },
+            },
+        ],
+    },
+};
 const config: ForgeConfig = {
     packagerConfig: {
         asar: true,
@@ -42,47 +88,8 @@ const config: ForgeConfig = {
         name: "electron-realistic"
     })],
     plugins: [
-        new WebpackPlugin({
-            mainConfig,
-            // The Content Security Policy (CSP) is a useful security feature of browser pages, including in Electron apps.
-            // Learn more it at the following links:
-            //
-            // - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
-            // - https://github.com/electron/electron/issues/19775
-            //
-            // We need to include 'ws:' because webpack uses WebSockets for reloading changed resources. This feature
-            // is called Hot Module Reloading (HMR).
-            //
-            // We need 'unsafe-inline' for styles, because the effect of webpack's 'style-loader' is that the web page
-            // applies its styles by some JavaScript code that appends a '<style>' element to the '<head>' element. To me,
-            // this is NOT inline styles, it's just an internal style sheet. Inline styles would be setting the style
-            // attribute on individual elements. So, I'm pretty confused. Also, in the same surprising spirit, even with
-            // a seemingly conservative CSP, you can still set styles via the CSS object model in JavaScript (see https://stackoverflow.com/q/36870421).
-            // So, I haven't really figured out this CSP thing, but I'm leaving this note to at least preserve some basic
-            // understanding.
-            //
-            // Specifically, without the CSP I get the error message:
-            //
-            //     Refused to apply inline style because it violates the following Content Security Policy (insertBySelector.js:32)
-            //
-            // And when I put a breakpoint at this line, I can tell it's trying to add a 'style' element to the 'head'
-            // element. Again, this is NOT an inline style. And I can't find any language in MDN that defines inline
-            // styles, but if I dig through to the CSP specs and proposals I would eventually find some logic.
-            devContentSecurityPolicy: "default-src 'self' http: https: ws:; style-src-elem 'self' 'unsafe-inline'",
-            renderer: {
-                config: rendererConfig,
-                entryPoints: [
-                    {
-                        html: htmlEntrypoint(),
-                        js: "./src/renderer.tsx",
-                        name: "main_window",
-                        preload: {
-                            js: "./src/preload.ts",
-                        },
-                    },
-                ],
-            },
-        }),
+        new MyForgeWebpackPlugin(webpackPluginConfig),
+        // new WebpackPlugin(webpackPluginConfig),
     ],
 };
 
