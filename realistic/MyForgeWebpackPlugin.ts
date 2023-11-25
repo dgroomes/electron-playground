@@ -41,9 +41,12 @@ export class MyForgeWebpackPlugin extends PluginBase<WebpackPluginConfig> {
     */
     private webpackOutputDir: string;
     private alreadyStarted: boolean = false;
-    private configGenerator: WebpackConfigGenerator;
-    private mainConfig: Configuration;
-    private rendererConfig: Configuration[];
+    private devConfigGenerator: WebpackConfigGenerator;
+    private prodConfigGenerator: WebpackConfigGenerator;
+    private devMainConfig: Configuration;
+    private devRendererConfig: Configuration[];
+    private prodMainConfig: Configuration;
+    private prodRendererConfig: Configuration[];
     private webpackWatching: Watching;
     private readonly port : number;
 
@@ -55,14 +58,15 @@ export class MyForgeWebpackPlugin extends PluginBase<WebpackPluginConfig> {
         // is called with a different 'this' context in the Electron Forge code. See https://github.com/electron/forge/blob/61d398abde51a21e280e59d319d5a77dbf3f7936/packages/api/core/src/util/plugin-interface.ts#L154
         this.startLogic = this.startLogic.bind(this);
         this.secondInit = this.secondInit.bind(this);
-        this.oneTimeBuild = this.oneTimeBuild.bind(this);
+        this.buildForProduction = this.buildForProduction.bind(this);
         this.registerOverallExitHandlerUponElectronExit = this.registerOverallExitHandlerUponElectronExit.bind(this);
     }
 
     init(_dir: string, _config: ResolvedForgeConfig) {
         this.rootDir = _dir;
         this.webpackOutputDir = path.resolve(this.rootDir, '.webpack');
-        this.configGenerator = new WebpackConfigGenerator(this.config, this.rootDir, false, this.port); // TODO I need to figure out production mode.
+        this.devConfigGenerator = new WebpackConfigGenerator(this.config, this.rootDir, false, this.port);
+        this.prodConfigGenerator = new WebpackConfigGenerator(this.config, this.rootDir, true, this.port);
         super.init(this.rootDir, _config);
     }
 
@@ -74,19 +78,28 @@ export class MyForgeWebpackPlugin extends PluginBase<WebpackPluginConfig> {
      */
     private async secondInit() {
         console.log("MyForgeWebpackPlugin.secondInit() called");
-        this.mainConfig = await this.configGenerator.getMainConfig();
-        this.rendererConfig = await this.configGenerator.getRendererConfig(this.config.renderer.entryPoints);
+        this.devMainConfig = await this.devConfigGenerator.getMainConfig();
+        this.devRendererConfig = await this.devConfigGenerator.getRendererConfig(this.config.renderer.entryPoints);
+        this.prodMainConfig = await this.prodConfigGenerator.getMainConfig();
+        this.prodRendererConfig = await this.prodConfigGenerator.getRendererConfig(this.config.renderer.entryPoints);
     }
 
     /**
-     * Build the webpack bundles exactly once (i.e. without watching). This method is designed to be used to build the
-     * program before handing it back off to Electron Forge for packaging. This method is NOT designed to be used for
-     * your live development workflow. The live development workflow is supported by the startLogic() method.
+     * Build the production webpack bundles. This process is different from the dev workflow in the following ways:
+     * <pre>
+     *     - There is no watching. This is a one-shot build.
+     *     - There is no dev server.
+     *     - The bundles are minimized (I'm not sure what other optimizations webpack is doing).
+     * </pre>
+     *
+     * This method is designed to be used to build the program before handing it back off to Electron Forge for
+     * packaging. This method is NOT designed to be used for your live development workflow. The live development
+     * workflow is supported by the startLogic() method.
      */
-    private async oneTimeBuild() {
+    private async buildForProduction() {
         // Because there is no watching, and no dev servers involved, we can afford to express all webpack 'Configuration'
         // objects into the same webpack compiler object. Then, we just invoke the compiler once. We promisify the call.
-        const config = [this.mainConfig, ...this.rendererConfig]
+        const config = [this.prodMainConfig, ...this.prodRendererConfig]
         const compiler = webpack(config);
         const stats = await webpackRunPromisified(compiler);
         if (stats.hasErrors()) {
@@ -103,7 +116,7 @@ export class MyForgeWebpackPlugin extends PluginBase<WebpackPluginConfig> {
     getHooks(): ForgeMultiHookMap {
         return {
             generateAssets: this.secondInit,
-            prePackage: this.oneTimeBuild,
+            prePackage: this.buildForProduction,
             postStart: this.registerOverallExitHandlerUponElectronExit
         };
     }
@@ -118,7 +131,7 @@ export class MyForgeWebpackPlugin extends PluginBase<WebpackPluginConfig> {
         this.alreadyStarted = true;
 
         // Compile the main process bundles. The returned promise resolves when the compilation is complete.
-        const mainCompiler = webpack(this.mainConfig);
+        const mainCompiler = webpack(this.devMainConfig);
         const compileMainPromise = webpackWatchPromisified(mainCompiler).currentCompilation();
 
         const rendererServer = await this.rendererServer();
@@ -132,7 +145,7 @@ export class MyForgeWebpackPlugin extends PluginBase<WebpackPluginConfig> {
      *  Create and configure a webpack compiler and webpack-dev-server for the renderer process bundles.
      */
     private async rendererServer(): Promise<WebpackDevServer> {
-        const compiler = webpack(this.rendererConfig);
+        const compiler = webpack(this.devRendererConfig);
 
         // TODO Consider if we need/should use ElectronForgeLoggingPlugin. I think it might be pointless (maybe, maybe not)
         //  because I'm letting webpack do its own logging, but it must exist for a reason.
