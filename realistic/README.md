@@ -137,11 +137,14 @@ General clean-ups, TODOs and things I wish to implement for this project:
   `resolveForgeConfig` and `packageAfterCopy` hooks.
     * DONE Implement the effect of `resolveForgeConfig`: ignore everything but `.webpack/` during packaging.
     * DONE Implement the effect of `packageAfterCopy`.
-* [ ] `ProjectForgePlugin`. Turn the `MyForgeWebpackPlugin` into a project-specific plugin. This plugin is tailored to
+* [ ] IN PROGRESS `ProjectForgePlugin`. Turn the `MyForgeWebpackPlugin` into a project-specific plugin. This plugin is tailored to
   the needs of the project, going further than just webpack-specific things. This is a trade-off. It gives up the generic
   quality of the plugin code (and thus "off-the-shelf reusability") but it removes layers of indirection (good). For
   example, there won't be a need for webpack-merge, or the merging/resolving of the Forge config in the `resolveForConfig`
   hook. 
+    * DONE Rename and re-doc
+    * Hardcode config
+    * More?
 * [ ] SKIP Drop the `WebpackConfig.ts` code and use my own webpack config (this is phase 2 of the overall custom plugin)
     * Update: maybe I won't do this. The AssetRelocatorPatch is a particularly nasty implementation detail. I don't want
       to maintain that.

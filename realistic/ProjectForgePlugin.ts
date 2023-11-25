@@ -16,19 +16,21 @@ import * as path from "path";
 import {webpackRunPromisified, webpackWatchPromisified} from "./webpack-util";
 
 /**
- * This is a plugin for Electron Forge that incorporates a webpack-based build strategy into the Electron Forge build
- * process. This is a custom alternative to Electron Forge's own webpack plugin: https://www.electronforge.io/config/plugins/webpack
+ * A custom Electron Forge plugin purpose-built for this project. This plugin is not designed as a generic and reusable
+ * piece of software. This plugin is tailored to the exact technology and architecture of this project. Specifically, the
+ * plugin incorporates a webpack-based build strategy into the Electron Forge build process. The plugin embeds specific
+ * webpack configuration that describes the entrypoints and customizations desired by this project.
  *
- * The core motivation for this plugin is to eject from some restrictions of Electron Forge's own official webpack plugin.
- * We need the extra degrees of freedom. Specifically, the official plugin hard codes the configuration of the HtmlWebpackPlugin,
- * and it disables all webpack logging. See these related links
+ * This plugin is heavily adapted from Electron Forge's own webpack plugin: https://www.electronforge.io/config/plugins/webpack
+ * It's not possible to use the official plugin because of some key restrictions. Specifically, the official plugin hard
+ * codes the configuration of the HtmlWebpackPlugin, and it disables all webpack logging. See these related links
  *   - https://github.com/electron/forge/blob/b4f6dd9f8da7ba63099e4b802c59d1f56feca0cc/packages/plugin/webpack/src/WebpackConfig.ts#L269
  *   - https://github.com/electron/forge/issues/2968
  *   - https://github.com/electron/forge/blob/b4f6dd9f8da7ba63099e4b802c59d1f56feca0cc/packages/plugin/webpack/src/WebpackPlugin.ts#L309
  *   - https://github.com/electron/forge/blob/b4f6dd9f8da7ba63099e4b802c59d1f56feca0cc/packages/plugin/webpack/src/WebpackPlugin.ts#L311
  */
-export class MyForgeWebpackPlugin extends PluginBase<WebpackPluginConfig> {
-    name: string = "MyForgeWebpackPlugin";
+export class ProjectForgePlugin extends PluginBase<WebpackPluginConfig> {
+    name: string = "ProjectForgePlugin";
 
     // This is the root directory of the project itself.
     private rootDir: string;
@@ -77,7 +79,7 @@ export class MyForgeWebpackPlugin extends PluginBase<WebpackPluginConfig> {
      * a more appropriate hook to do this but there are only a few hooks.
      */
     private async secondInit() {
-        console.log("MyForgeWebpackPlugin.secondInit() called");
+        console.log("ProjectForgePlugin.secondInit() called");
         this.devMainConfig = await this.devConfigGenerator.getMainConfig();
         this.devRendererConfig = await this.devConfigGenerator.getRendererConfig(this.config.renderer.entryPoints);
         this.prodMainConfig = await this.prodConfigGenerator.getMainConfig();
@@ -146,9 +148,6 @@ export class MyForgeWebpackPlugin extends PluginBase<WebpackPluginConfig> {
      */
     private async rendererServer(): Promise<WebpackDevServer> {
         const compiler = webpack(this.devRendererConfig);
-
-        // TODO Consider if we need/should use ElectronForgeLoggingPlugin. I think it might be pointless (maybe, maybe not)
-        //  because I'm letting webpack do its own logging, but it must exist for a reason.
 
         const devServerConfig: WebpackDevServer.Configuration = {
             hot: true,

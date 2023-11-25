@@ -3,7 +3,7 @@ import {MakerDMG} from "@electron-forge/maker-dmg";
 import {WebpackPlugin} from "@electron-forge/plugin-webpack";
 import {mainConfig} from "./webpack.main.config";
 import {rendererConfig} from "./webpack.renderer.config";
-import {MyForgeWebpackPlugin} from "./MyForgeWebpackPlugin";
+import {ProjectForgePlugin} from "./ProjectForgePlugin";
 
 /**
  * This is one piece in the puzzle of our integration to React Developer Tools. See the related note in the README.
@@ -122,7 +122,7 @@ const config: ForgeConfig = {
         name: "electron-realistic"
     })],
     plugins: [
-        new MyForgeWebpackPlugin(webpackPluginConfig),
+        new ProjectForgePlugin(webpackPluginConfig),
         // new WebpackPlugin(webpackPluginConfig),
     ],
 };
