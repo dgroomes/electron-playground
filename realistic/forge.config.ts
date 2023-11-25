@@ -1,8 +1,6 @@
 import type {ForgeConfig} from "@electron-forge/shared-types";
 import {MakerDMG} from "@electron-forge/maker-dmg";
-import {WebpackPlugin} from "@electron-forge/plugin-webpack";
-import {mainConfig} from "./webpack.main.config";
-import {rendererConfig} from "./webpack.renderer.config";
+import {WebpackPlugin, WebpackPluginConfig} from "@electron-forge/plugin-webpack";
 import {ProjectForgePlugin} from "./ProjectForgePlugin";
 
 /**
@@ -25,8 +23,24 @@ function htmlEntrypoint(): string {
     }
 }
 
-let webpackPluginConfig = {
-    mainConfig,
+const webpackPluginConfig: WebpackPluginConfig = {
+    mainConfig: {
+        entry: "./src/main.ts",
+        module: {
+            rules: [
+                {
+                    test: /\.tsx?$/,
+                    exclude: /(node_modules|\.webpack)/,
+                    use: {
+                        loader: "ts-loader",
+                    },
+                },
+            ],
+        },
+        resolve: {
+            extensions: [".js", ".ts", ".jsx", ".tsx", ".css", ".json"],
+        },
+    },
     // The Content Security Policy (CSP) is a useful security feature of browser pages, including in Electron apps.
     // Learn more it at the following links:
     //
@@ -53,7 +67,46 @@ let webpackPluginConfig = {
     // styles, but if I dig through to the CSP specs and proposals I would eventually find some logic.
     devContentSecurityPolicy: "default-src 'self' http: https: ws:; style-src-elem 'self' 'unsafe-inline'",
     renderer: {
-        config: rendererConfig,
+        config: {
+            plugins: [],
+            stats: {
+                logging: "verbose",
+            },
+            infrastructureLogging: {
+                level: "verbose",
+            },
+            module: {
+                rules: [
+                    {
+                        test: /\.tsx?$/,
+                        exclude: /(node_modules|\.webpack)/,
+                        use: {
+                            loader: "ts-loader",
+                        },
+                    },
+                    {
+                        test: /\.css$/,
+                        use: [{loader: 'style-loader'}, {loader: 'css-loader'}],
+                    }
+                ],
+            },
+            performance: {
+                // During development, the bundle size exceeds a default webpack configuration which exists as a "performance
+                // hint". This is annoying because it's not actionable. The bundle is so large because we're using style-loader
+                // and other things and somehow this gets over 250KiB (I'm surprised by that). But this is a normal/mainstream
+                // setup, so we consider the warning message a false alarm. Turn it off. See the related discussion: https://github.com/webpack/webpack/issues/3486
+                hints: false
+            },
+
+            // Let's use 'source-map' instead of the default behavior which uses 'eval'. When 'eval' is used, then we need to
+            // relax the Content-Security-Policy rule to allow 'unsafe-eval'. This is not a great trade-off in my case, because
+            // I don't need the extra build speed of the default behavior, and I'd prefer to appease the security preferences of
+            // the browser, which logs an annoying warning to the console when 'unsafe-eval' is used.
+            devtool: "source-map",
+            resolve: {
+                extensions: [".js", ".ts", ".jsx", ".tsx", ".css"],
+            },
+        },
         // Entrypoints are an Electron Forge concept, but they closely resemble webpack 'Entry' objects.
         // You might have multiple entrypoints if say you're product has a "new UI" and an "old UI". Or maybe
         // you just have a multipage application with pages like "/home", "/about", "/contact", and you handle
@@ -70,6 +123,7 @@ let webpackPluginConfig = {
         ],
     },
 };
+
 const config: ForgeConfig = {
     packagerConfig: {
 
@@ -90,7 +144,7 @@ const config: ForgeConfig = {
         evolving. Instead, we would rather express "include only things in the '.webpack/' directory". It's hard to
         express "not matching" directly in a regex so we can implement an "ignore" function.
         */
-        ignore:  (path: string) => {
+        ignore: (path: string) => {
             // For some reason, we get an empty string. Semantically this doesn't make sense. But if you ignore this
             // entry then nothing gets copied and the build fails. I think it probably represents the root directory,
             // but really they should have used "." or "/" for that case. It's a quirk.

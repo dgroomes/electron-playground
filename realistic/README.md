@@ -143,7 +143,9 @@ General clean-ups, TODOs and things I wish to implement for this project:
   example, there won't be a need for webpack-merge, or the merging/resolving of the Forge config in the `resolveForConfig`
   hook. 
     * DONE Rename and re-doc
-    * Hardcode config
+    * DONE Combine config
+    * Consider starting Electron Forge from the Node API instead of the CLI via start script. I'd like to get rid of the
+      `forge.config.ts` file if possible. The project plugin is the monolithic entity, including config.
     * More?
 * [ ] SKIP Drop the `WebpackConfig.ts` code and use my own webpack config (this is phase 2 of the overall custom plugin)
     * Update: maybe I won't do this. The AssetRelocatorPatch is a particularly nasty implementation detail. I don't want
