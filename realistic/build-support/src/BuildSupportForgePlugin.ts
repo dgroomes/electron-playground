@@ -8,11 +8,11 @@ import {
 } from "@electron-forge/shared-types";
 import {Configuration, Watching, webpack, DefinePlugin} from "webpack";
 import WebpackDevServer from "webpack-dev-server";
-import WebpackConfigGenerator from "./MyWebpackConfig";
+import WebpackConfigGenerator from "./WebpackConfigGenerator";
 import * as console from "console";
 import * as path from "path";
 import {webpackRunPromisified, webpackWatchPromisified} from "./webpack-util";
-import {WebpackPluginConfig, WebpackPluginEntryPoint} from "./Config";
+import {WebpackPluginConfig, WebpackPluginEntryPoint} from "./WebpackPluginConfig";
 import {isLocalWindow, isNoWindow} from "./rendererTypeUtils";
 
 /**
@@ -64,11 +64,12 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
         this.registerOverallExitHandlerUponElectronExit = this.registerOverallExitHandlerUponElectronExit.bind(this);
     }
 
+    // noinspection JSUnusedGlobalSymbols
     init(_dir: string, _config: ResolvedForgeConfig) {
         this.rootDir = _dir;
         this.webpackOutputDir = path.resolve(this.rootDir, '.webpack');
-        this.devConfigGenerator = new WebpackConfigGenerator(this.config, this.rootDir, false, this.port);
-        this.prodConfigGenerator = new WebpackConfigGenerator(this.config, this.rootDir, true, this.port);
+        this.devConfigGenerator = new WebpackConfigGenerator(this.config, this.rootDir, false);
+        this.prodConfigGenerator = new WebpackConfigGenerator(this.config, this.rootDir, true);
         super.init(this.rootDir, _config);
     }
 
@@ -142,6 +143,7 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
 
     private rendererEntryPoint(entryPoint: WebpackPluginEntryPoint, basename: string, isProd: boolean): string {
         if (isProd) {
+            // noinspection ES6RedundantNestingInTemplateLiteral
             return `\`file://$\{require('path').resolve(__dirname, '..', '${'renderer'}', '${entryPoint.name}', '${basename}')}\``;
         }
         const baseUrl = `http://localhost:${this.port}/${entryPoint.name}`;
@@ -175,6 +177,7 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
         }
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * Electron Forge has a "hooks" system that allows plugins to extend the build process.
      *

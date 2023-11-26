@@ -1,4 +1,4 @@
-import { WebpackPluginEntryPoint, WebpackPluginEntryPointLocalWindow, WebpackPluginEntryPointNoWindow, WebpackPluginEntryPointPreloadOnly } from './Config';
+import { WebpackPluginEntryPoint, WebpackPluginEntryPointLocalWindow, WebpackPluginEntryPointNoWindow, WebpackPluginEntryPointPreloadOnly } from './WebpackPluginConfig';
 
 /**
  * Reusable type predicate functions to narrow down the type of the WebpackPluginEntryPoint

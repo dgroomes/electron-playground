@@ -8,16 +8,14 @@ import {
   WebpackPluginEntryPoint,
   WebpackPluginEntryPointLocalWindow,
   WebpackPluginEntryPointPreloadOnly
-} from './Config';
+} from './WebpackPluginConfig';
 import {
   isLocalOrNoWindowEntries,
   isLocalWindow,
-  isNoWindow,
   isPreloadOnly,
   isPreloadOnlyEntries
 } from './rendererTypeUtils';
 
-type EntryType = string | string[] | Record<string, string | string[]>;
 type WebpackMode = 'production' | 'development';
 
 enum RendererTarget {
@@ -50,23 +48,17 @@ export default class WebpackConfigGenerator {
 
   private pluginConfig: WebpackPluginConfig;
 
-  private readonly port: number;
-
-  private readonly projectDir: string;
-
   private readonly webpackDir: string;
   private readonly mode: WebpackMode;
 
-  constructor(pluginConfig: WebpackPluginConfig, projectDir: string, isProd: boolean, port: number) {
+  constructor(pluginConfig: WebpackPluginConfig, projectDir: string, isProd: boolean) {
     if (!pluginConfig.renderer.entryPoints || !Array.isArray(pluginConfig.renderer.entryPoints)) {
       throw new Error('Required config option "renderer.entryPoints" has not been defined');
     }
 
     this.pluginConfig = pluginConfig;
-    this.projectDir = projectDir;
     this.webpackDir = path.resolve(projectDir, '.webpack');
     this.isProd = isProd;
-    this.port = port;
     this.mode = this.isProd ? 'production' : 'development';
 
     console.debug('Config mode:', this.mode);

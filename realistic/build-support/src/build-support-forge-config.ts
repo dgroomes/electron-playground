@@ -1,6 +1,6 @@
 import type {ForgeConfig} from "@electron-forge/shared-types";
 import {MakerDMG} from "@electron-forge/maker-dmg";
-import {WebpackPluginConfig} from "./Config";
+import {WebpackPluginConfig} from "./WebpackPluginConfig";
 import {BuildSupportForgePlugin} from "./BuildSupportForgePlugin";
 import type {Configuration} from "webpack";
 
@@ -160,7 +160,7 @@ const config: ForgeConfig = {
         it copied the `.gitignore`). So, we need to tell Electron Packager to NOT copy all this stuff. The 'ignore'
         configuration is the solution. But we don't want to enumerate the things to ignore because that list is large and
         evolving. Instead, we would rather express "include only things in the '.webpack/' directory". It's hard to
-        express "not matching" directly in a regex so we can implement an "ignore" function.
+        express "not matching" directly in a regex, so we can implement an "ignore" function.
         */
         ignore: (path: string) => {
             // For some reason, we get an empty string. Semantically this doesn't make sense. But if you ignore this
@@ -198,4 +198,5 @@ const config: ForgeConfig = {
     ],
 };
 
+// noinspection JSUnusedGlobalSymbols
 export default config;

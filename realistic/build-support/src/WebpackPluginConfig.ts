@@ -83,10 +83,6 @@ export interface WebpackPreloadEntryPoint {
   config?: Configuration;
 }
 
-export interface StandaloneWebpackPreloadEntryPoint extends WebpackPreloadEntryPoint {
-  name: string;
-}
-
 export interface WebpackPluginRendererConfig {
   /**
    * The webpack config for your renderer process
@@ -114,7 +110,7 @@ export interface WebpackPluginRendererConfig {
   nodeIntegration?: boolean;
   /**
    * Array of entry points, these should map to the windows your app needs to
-   * open.  Each window requires it's own entry point
+   * open.  Each window requires its own entry point
    */
   entryPoints: WebpackPluginEntryPoint[];
 }
@@ -145,7 +141,7 @@ export interface WebpackPluginConfig {
   /**
    * In the event that webpack has been configured with `devtool: sourcemap` (or any other option
    * which results in `.map` files being generated), this option will cause the source map files be
-   * packaged with your app. By default they are not included.
+   * packaged with your app. By default, they are not included.
    */
   packageSourceMaps?: boolean;
   /**
