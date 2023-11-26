@@ -171,7 +171,7 @@ General clean-ups, TODOs and things I wish to implement for this project:
       the common code and utility functions separate from the prod/dev stuff (that got too co-mingled in the official
       plugin). `webpack-util.ts` has worked well, I might push more webpack-specific stuff into there.
     * DONE dev/prod strategy objects.
-    * Keep reducing.
+    * IN PROGRESS Keep reducing.
     * What is ExternalsPlugin (used in the preload entrypoint)?
 * [ ] Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.
 * [x] DONE Hot reloading for styles isn't working. That's totally my bad, I knew this and took out the style loader hastily.

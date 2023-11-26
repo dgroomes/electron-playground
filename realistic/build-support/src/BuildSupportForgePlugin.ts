@@ -14,7 +14,7 @@ import * as path from "path";
 import {webpackRunPromisified, webpackWatchPromisified} from "./webpack-util";
 import {WebpackPluginConfig, WebpackPluginEntryPoint} from "./WebpackPluginConfig";
 import {isLocalWindow, isNoWindow} from "./rendererTypeUtils";
-import {DevelopmentEnvStrategy, ProductionEnvStrategy} from "./EnvStrategy";
+import {DevelopmentEnvStrategy, EnvStrategy, ProductionEnvStrategy} from "./EnvStrategy";
 
 /**
  * A custom Electron Forge plugin purpose-built for this project. This plugin is not designed as a generic and reusable
@@ -52,6 +52,8 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
     private prodRendererConfig: Configuration[];
     private webpackWatching: Watching;
     private readonly port: number;
+    private devStrategy = new DevelopmentEnvStrategy();
+    private prodStrategy = new ProductionEnvStrategy();
 
     constructor(config: WebpackPluginConfig) {
         super(config);
@@ -69,8 +71,8 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
     init(_dir: string, _config: ResolvedForgeConfig) {
         this.rootDir = _dir;
         this.webpackOutputDir = path.resolve(this.rootDir, '.webpack');
-        this.devConfigGenerator = new WebpackConfigGenerator(this.config, this.rootDir, new DevelopmentEnvStrategy());
-        this.prodConfigGenerator = new WebpackConfigGenerator(this.config, this.rootDir, new ProductionEnvStrategy());
+        this.devConfigGenerator = new WebpackConfigGenerator(this.config, this.rootDir, this.devStrategy);
+        this.prodConfigGenerator = new WebpackConfigGenerator(this.config, this.rootDir, this.prodStrategy);
         super.init(this.rootDir, _config);
     }
 
@@ -82,42 +84,41 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
      */
     private async secondInit() {
         console.log("BuildSupportForgePlugin.secondInit() called");
-        this.devMainConfig = this.getMainConfig(false);
+        this.devMainConfig = this.getMainConfig(this.devStrategy);
         this.devRendererConfig = await this.devConfigGenerator.getRendererConfig(this.config.renderer.entryPoints);
-        this.prodMainConfig = this.getMainConfig(true);
+        this.prodMainConfig = this.getMainConfig(this.prodStrategy);
         this.prodRendererConfig = await this.prodConfigGenerator.getRendererConfig(this.config.renderer.entryPoints);
     }
-
 
     /**
      * This was ported from the WebpackConfigGenerator. It's a bit awkward right now.
      * @private
      */
-    private getMainConfig(isProd: boolean): Configuration {
+    private getMainConfig(envStrategy: EnvStrategy) {
         const mainConfig = this.config.mainConfig();
         mainConfig.entry = path.resolve(this.rootDir, "./src/main.ts");
         mainConfig.output.path = path.resolve(this.webpackOutputDir, 'main');
-        mainConfig.mode =  isProd ? 'production' : 'development';
-        mainConfig.plugins = [new DefinePlugin(this.getDefines(isProd))];
+        mainConfig.mode =  envStrategy.mode()
+        mainConfig.plugins = [new DefinePlugin(this.getDefines(envStrategy))];
         return mainConfig;
     }
 
     /**
      * This was ported from the WebpackConfigGenerator. It's a bit awkward right now.
      */
-    private getDefines(isProd: boolean): Record<string, string> {
+    private getDefines(envStrategy: EnvStrategy): Record<string, string> {
         const defines: Record<string, string> = {};
         for (const entryPoint of this.config.renderer.entryPoints) {
             const entryKey = this.toEnvironmentVariable(entryPoint);
             if (isLocalWindow(entryPoint)) {
-                defines[entryKey] = this.rendererEntryPoint(entryPoint, 'index.html', isProd);
+                defines[entryKey] = envStrategy.rendererEntryPoint(entryPoint.name, 'index.html', this.port);
             } else {
-                defines[entryKey] = this.rendererEntryPoint(entryPoint, 'index.js', isProd);
+                defines[entryKey] = envStrategy.rendererEntryPoint(entryPoint.name, 'index.js', this.port);
             }
             defines[`process.env.${entryKey}`] = defines[entryKey];
 
             const preloadDefineKey = this.toEnvironmentVariable(entryPoint, true);
-            defines[preloadDefineKey] = this.getPreloadDefine(entryPoint, isProd);
+            defines[preloadDefineKey] = this.getPreloadDefine(entryPoint, envStrategy);
             defines[`process.env.${preloadDefineKey}`] = defines[preloadDefineKey];
         }
 
@@ -129,31 +130,15 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
         return `${entryPoint.name.toUpperCase().replace(/ /g, '_')}${suffix}`;
     }
 
-    private getPreloadDefine(entryPoint: WebpackPluginEntryPoint, isProd: boolean): string {
-        if (!isNoWindow(entryPoint)) {
-            if (isProd) {
-                return `require('path').resolve(__dirname, '../renderer', '${entryPoint.name}', 'preload.js')`;
-            }
-            return `'${path.resolve(this.webpackOutputDir, 'renderer', entryPoint.name, 'preload.js').replace(/\\/g, '\\\\')}'`;
-        } else {
+    private getPreloadDefine(entryPoint: WebpackPluginEntryPoint, envStrategy: EnvStrategy): string {
+        if (isNoWindow(entryPoint)) {
             // If this entry-point has no configured preload script just map this constant to `undefined`
             // so that any code using it still works.  This makes quick-start / docs simpler.
             return 'undefined';
         }
-    }
 
-    private rendererEntryPoint(entryPoint: WebpackPluginEntryPoint, basename: string, isProd: boolean): string {
-        if (isProd) {
-            // noinspection ES6RedundantNestingInTemplateLiteral
-            return `\`file://$\{require('path').resolve(__dirname, '..', '${'renderer'}', '${entryPoint.name}', '${basename}')}\``;
-        }
-        const baseUrl = `http://localhost:${this.port}/${entryPoint.name}`;
-        if (basename !== 'index.html') {
-            return `'${baseUrl}/${basename}'`;
-        }
-        return `'${baseUrl}'`;
+        return envStrategy.preloadDefine(this.webpackOutputDir, entryPoint);
     }
-
 
     /**
      * Build the production webpack bundles. This process is different from the dev workflow in the following ways:
