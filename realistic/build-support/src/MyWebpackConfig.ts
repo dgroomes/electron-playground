@@ -72,93 +72,6 @@ export default class WebpackConfigGenerator {
     console.debug('Config mode:', this.mode);
   }
 
-  private rendererEntryPoint(entryPoint: WebpackPluginEntryPoint, basename: string): string {
-    if (this.isProd) {
-      return `\`file://$\{require('path').resolve(__dirname, '..', '${'renderer'}', '${entryPoint.name}', '${basename}')}\``;
-    }
-    const baseUrl = `http://localhost:${this.port}/${entryPoint.name}`;
-    if (basename !== 'index.html') {
-      return `'${baseUrl}/${basename}'`;
-    }
-    return `'${baseUrl}'`;
-  }
-
-  private toEnvironmentVariable(entryPoint: WebpackPluginEntryPoint, preload = false): string {
-    const suffix = preload ? '_PRELOAD_WEBPACK_ENTRY' : '_WEBPACK_ENTRY';
-    return `${entryPoint.name.toUpperCase().replace(/ /g, '_')}${suffix}`;
-  }
-
-  private getPreloadDefine(entryPoint: WebpackPluginEntryPoint): string {
-    if (!isNoWindow(entryPoint)) {
-      if (this.isProd) {
-        return `require('path').resolve(__dirname, '../renderer', '${entryPoint.name}', 'preload.js')`;
-      }
-      return `'${path.resolve(this.webpackDir, 'renderer', entryPoint.name, 'preload.js').replace(/\\/g, '\\\\')}'`;
-    } else {
-      // If this entry-point has no configured preload script just map this constant to `undefined`
-      // so that any code using it still works.  This makes quick-start / docs simpler.
-      return 'undefined';
-    }
-  }
-
-  private getDefines(): Record<string, string> {
-    const defines: Record<string, string> = {};
-    for (const entryPoint of this.pluginConfig.renderer.entryPoints) {
-      const entryKey = this.toEnvironmentVariable(entryPoint);
-      if (isLocalWindow(entryPoint)) {
-        defines[entryKey] = this.rendererEntryPoint(entryPoint, 'index.html');
-      } else {
-        defines[entryKey] = this.rendererEntryPoint(entryPoint, 'index.js');
-      }
-      defines[`process.env.${entryKey}`] = defines[entryKey];
-
-      const preloadDefineKey = this.toEnvironmentVariable(entryPoint, true);
-      defines[preloadDefineKey] = this.getPreloadDefine(entryPoint);
-      defines[`process.env.${preloadDefineKey}`] = defines[preloadDefineKey];
-    }
-
-    return defines;
-  }
-
-  async getMainConfig(): Promise<Configuration> {
-    const mainConfig = this.pluginConfig.mainConfig;
-
-    if (!mainConfig.entry) {
-      throw new Error('Required option "mainConfig.entry" has not been defined');
-    }
-    const fix = (item: EntryType): EntryType => {
-      if (typeof item === 'string') return (fix([item]) as string[])[0];
-      if (Array.isArray(item)) {
-        return item.map((val) => (val.startsWith('./') ? path.resolve(this.projectDir, val) : val));
-      }
-      const ret: Record<string, string | string[]> = {};
-      for (const key of Object.keys(item)) {
-        ret[key] = fix(item[key]) as string | string[];
-      }
-      return ret;
-    };
-    mainConfig.entry = fix(mainConfig.entry as EntryType);
-
-    return webpackMerge(
-      {
-        devtool: 'source-map',
-        target: 'electron-main',
-        mode: this.mode,
-        output: {
-          path: path.resolve(this.webpackDir, 'main'),
-          filename: 'index.js',
-          libraryTarget: 'commonjs2',
-        },
-        plugins: [new webpack.DefinePlugin(this.getDefines())],
-        node: {
-          __dirname: false,
-          __filename: false,
-        },
-      },
-      mainConfig || {}
-    );
-  }
-
   async getRendererConfig(entryPoints: WebpackPluginEntryPoint[]): Promise<Configuration[]> {
     const entryPointsForTarget = {
       web: [] as (WebpackPluginEntryPointLocalWindow | WebpackPluginEntryPoint)[],
@@ -248,7 +161,7 @@ export default class WebpackConfigGenerator {
         );
       }
     }
-    return webpackMerge(baseConfig, rendererConfig || {}, { entry, output, plugins });
+    return webpackMerge(baseConfig, rendererConfig() || {}, { entry, output, plugins });
   }
 
   private async buildRendererConfigForPreloadOrSandboxedPreloadTarget(
@@ -263,7 +176,7 @@ export default class WebpackConfigGenerator {
 
     const entry: webpack.Entry = {};
     const baseConfig: webpack.Configuration = this.buildRendererBaseConfig(target);
-    const rendererConfig = entryPoints[0].preload?.config || this.pluginConfig.renderer.config;
+    const rendererConfig = entryPoints[0].preload?.config || this.pluginConfig.renderer.config();
 
     for (const entryPoint of entryPoints) {
       entry[entryPoint.name] = (entryPoint.prefixedEntries || []).concat([entryPoint.preload.js]);

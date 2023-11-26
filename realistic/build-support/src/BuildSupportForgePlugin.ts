@@ -6,13 +6,14 @@ import {
     StartOptions,
     StartResult
 } from "@electron-forge/shared-types";
-import {Configuration, Watching, webpack} from "webpack";
+import {Configuration, Watching, webpack, DefinePlugin} from "webpack";
 import WebpackDevServer from "webpack-dev-server";
 import WebpackConfigGenerator from "./MyWebpackConfig";
 import * as console from "console";
 import * as path from "path";
 import {webpackRunPromisified, webpackWatchPromisified} from "./webpack-util";
-import {WebpackPluginConfig} from "./Config";
+import {WebpackPluginConfig, WebpackPluginEntryPoint} from "./Config";
+import {isLocalWindow, isNoWindow} from "./rendererTypeUtils";
 
 /**
  * A custom Electron Forge plugin purpose-built for this project. This plugin is not designed as a generic and reusable
@@ -79,11 +80,77 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
      */
     private async secondInit() {
         console.log("BuildSupportForgePlugin.secondInit() called");
-        this.devMainConfig = await this.devConfigGenerator.getMainConfig();
+        this.devMainConfig = this.getMainConfig(false);
         this.devRendererConfig = await this.devConfigGenerator.getRendererConfig(this.config.renderer.entryPoints);
-        this.prodMainConfig = await this.prodConfigGenerator.getMainConfig();
+        this.prodMainConfig = this.getMainConfig(true);
         this.prodRendererConfig = await this.prodConfigGenerator.getRendererConfig(this.config.renderer.entryPoints);
     }
+
+
+    /**
+     * This was ported from the WebpackConfigGenerator. It's a bit awkward right now.
+     * @private
+     */
+    private getMainConfig(isProd: boolean): Configuration {
+        const mainConfig = this.config.mainConfig();
+        mainConfig.entry = path.resolve(this.rootDir, "./src/main.ts");
+        mainConfig.output.path = path.resolve(this.webpackOutputDir, 'main');
+        mainConfig.mode =  isProd ? 'production' : 'development';
+        mainConfig.plugins = [new DefinePlugin(this.getDefines(isProd))];
+        return mainConfig;
+    }
+
+    /**
+     * This was ported from the WebpackConfigGenerator. It's a bit awkward right now.
+     */
+    private getDefines(isProd: boolean): Record<string, string> {
+        const defines: Record<string, string> = {};
+        for (const entryPoint of this.config.renderer.entryPoints) {
+            const entryKey = this.toEnvironmentVariable(entryPoint);
+            if (isLocalWindow(entryPoint)) {
+                defines[entryKey] = this.rendererEntryPoint(entryPoint, 'index.html', isProd);
+            } else {
+                defines[entryKey] = this.rendererEntryPoint(entryPoint, 'index.js', isProd);
+            }
+            defines[`process.env.${entryKey}`] = defines[entryKey];
+
+            const preloadDefineKey = this.toEnvironmentVariable(entryPoint, true);
+            defines[preloadDefineKey] = this.getPreloadDefine(entryPoint, isProd);
+            defines[`process.env.${preloadDefineKey}`] = defines[preloadDefineKey];
+        }
+
+        return defines;
+    }
+
+    private toEnvironmentVariable(entryPoint: WebpackPluginEntryPoint, preload = false): string {
+        const suffix = preload ? '_PRELOAD_WEBPACK_ENTRY' : '_WEBPACK_ENTRY';
+        return `${entryPoint.name.toUpperCase().replace(/ /g, '_')}${suffix}`;
+    }
+
+    private getPreloadDefine(entryPoint: WebpackPluginEntryPoint, isProd: boolean): string {
+        if (!isNoWindow(entryPoint)) {
+            if (isProd) {
+                return `require('path').resolve(__dirname, '../renderer', '${entryPoint.name}', 'preload.js')`;
+            }
+            return `'${path.resolve(this.webpackOutputDir, 'renderer', entryPoint.name, 'preload.js').replace(/\\/g, '\\\\')}'`;
+        } else {
+            // If this entry-point has no configured preload script just map this constant to `undefined`
+            // so that any code using it still works.  This makes quick-start / docs simpler.
+            return 'undefined';
+        }
+    }
+
+    private rendererEntryPoint(entryPoint: WebpackPluginEntryPoint, basename: string, isProd: boolean): string {
+        if (isProd) {
+            return `\`file://$\{require('path').resolve(__dirname, '..', '${'renderer'}', '${entryPoint.name}', '${basename}')}\``;
+        }
+        const baseUrl = `http://localhost:${this.port}/${entryPoint.name}`;
+        if (basename !== 'index.html') {
+            return `'${baseUrl}/${basename}'`;
+        }
+        return `'${baseUrl}'`;
+    }
+
 
     /**
      * Build the production webpack bundles. This process is different from the dev workflow in the following ways:

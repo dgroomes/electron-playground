@@ -1,5 +1,4 @@
 import {Configuration} from 'webpack';
-// @ts-ignore
 import WebpackDevServer from 'webpack-dev-server';
 
 export interface WebpackPluginEntryPointBase {
@@ -92,7 +91,7 @@ export interface WebpackPluginRendererConfig {
   /**
    * The webpack config for your renderer process
    */
-  config: Configuration;
+  config: () => Configuration;
   /**
    * Instructs webpack to emit a JSON file containing statistics about modules, the dependency
    * graph, and various other build information for the renderer process during the app
@@ -124,7 +123,7 @@ export interface WebpackPluginConfig {
   /**
    * The webpack config for your main process
    */
-  mainConfig: Configuration;
+  mainConfig: () => Configuration;
   /**
    * Instructs webpack to emit a JSON file containing statistics about modules, the dependency
    * graph, and various other build information for the main process. This file is located in
