@@ -1,6 +1,6 @@
 import type {ForgeConfig} from "@electron-forge/shared-types";
 import {MakerDMG} from "@electron-forge/maker-dmg";
-import {WebpackPlugin, WebpackPluginConfig} from "@electron-forge/plugin-webpack";
+import {WebpackPluginConfig} from "./Config";
 import {BuildSupportForgePlugin} from "./BuildSupportForgePlugin";
 
 /**
@@ -177,7 +177,6 @@ const config: ForgeConfig = {
     })],
     plugins: [
         new BuildSupportForgePlugin(webpackPluginConfig),
-        // new WebpackPlugin(webpackPluginConfig),
     ],
 };
 

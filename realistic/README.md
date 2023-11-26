@@ -55,6 +55,13 @@ Follow these instructions to build and run the app.
   * You will then need to find the `.dmg` file in the `out` directory and install it.
 
 
+Rebuilding and re-installed `build-support` is a bit of a pain. Try this alias to make it easier:
+
+```shell
+alias rbs='cd build-support && npm install && npm run build && npm pack && cd .. && npm install --save-dev ./build-support/electron-playground_realistic_build-support-1.0.0.tgz'
+```
+
+
 ## Instructions for React DevTools
 
 When you develop a React application, you'll likely want the power of the excellent [React Developer Tools](https://react.dev/learn/react-developer-tools)
@@ -152,10 +159,10 @@ General clean-ups, TODOs and things I wish to implement for this project:
     * DONE Combine config
     * ABANDON (No this is too odd) Consider starting Electron Forge from the Node API instead of the CLI via start script. I'd like to get rid of the
       `forge.config.ts` file if possible. The project plugin is the monolithic entity, including config.
-* [ ] SKIP Drop the `WebpackConfig.ts` code and use my own webpack config (this is phase 2 of the overall custom plugin)
-    * Update: maybe I won't do this. The AssetRelocatorPatch is a particularly nasty implementation detail. I don't want
-      to maintain that.
-    * What is AssetRelocatorPatch (used in the main entrypoint)?
+* [ ] IN PROGRESS Drop the `WebpackConfig.ts` code and use my own webpack config (this is phase 2 of the overall custom plugin)
+    * DONE Remove `@electron-forge/plugin-webpack` and wholesale copy over the needed code. I will gradually
+      rewrite it.
+    * DONE (it's not even used; maybe it was used for the native rebuilding which is something I also don't want) The AssetRelocatorPatch is a particularly nasty implementation detail. I don't really want to maintain it.
     * What is ExternalsPlugin (used in the preload entrypoint)?
 * [ ] Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.
 * [x] DONE Hot reloading for styles isn't working. That's totally my bad, I knew this and took out the style loader hastily.

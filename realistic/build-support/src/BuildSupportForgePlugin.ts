@@ -8,11 +8,11 @@ import {
 } from "@electron-forge/shared-types";
 import {Configuration, Watching, webpack} from "webpack";
 import WebpackDevServer from "webpack-dev-server";
-import {WebpackPluginConfig} from "@electron-forge/plugin-webpack";
-import WebpackConfigGenerator from "@electron-forge/plugin-webpack/dist/WebpackConfig";
+import WebpackConfigGenerator from "./MyWebpackConfig";
 import * as console from "console";
 import * as path from "path";
 import {webpackRunPromisified, webpackWatchPromisified} from "./webpack-util";
+import {WebpackPluginConfig} from "./Config";
 
 /**
  * A custom Electron Forge plugin purpose-built for this project. This plugin is not designed as a generic and reusable
