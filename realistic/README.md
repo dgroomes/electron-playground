@@ -163,6 +163,13 @@ General clean-ups, TODOs and things I wish to implement for this project:
     * DONE Remove `@electron-forge/plugin-webpack` and wholesale copy over the needed code. I will gradually
       rewrite it.
     * DONE (it's not even used; maybe it was used for the native rebuilding which is something I also don't want) The AssetRelocatorPatch is a particularly nasty implementation detail. I don't really want to maintain it.
+    * IN PROGRESS Keep reducing. I think keeping the forge config as a standalone const object is fine. I think inlining
+      the webpack config closer to code, in the `BuildSupportForgePlugin` is good. It has more dynamic content like resolving
+      the absolute paths and the prod/dev differences. The official WebpackForgePlugin proliferates dev/prod checks throughout
+      many if statements. I think they were very close to a good model, where the WebpackConfigGenerator should be implemented
+      by a "dev strategy" and a "prod strategy". I'm going to take that concept and implement that. But I'm going to keep
+      the common code and utility functions separate from the prod/dev stuff (that got too co-mingled in the official
+      plugin). `webpack-util.ts` has worked well, I might push more webpack-specific stuff into there.
     * What is ExternalsPlugin (used in the preload entrypoint)?
 * [ ] Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.
 * [x] DONE Hot reloading for styles isn't working. That's totally my bad, I knew this and took out the style loader hastily.
