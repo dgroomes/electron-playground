@@ -1,0 +1,17 @@
+/*
+See the official reference documentation for tsconfig: https://www.typescriptlang.org/tsconfig
+*/
+{
+  "compilerOptions": {
+    "outDir": "dist/",
+    "target": "ES6",
+    "module": "commonjs",
+    "declaration": true,
+    "esModuleInterop": true,
+    "strict": false,
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

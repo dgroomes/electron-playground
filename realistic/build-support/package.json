@@ -1,0 +1,25 @@
+{
+  "name": "electron-playground_realistic_build-support",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    "./plugin": "./dist/BuildSupportForgePlugin.js",
+    "./config": "./dist/build-support-forge-config.js"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.2"
+  },
+  "dependencies": {
+    "electron": "^27.0.4",
+    "@electron-forge/cli": "^6.4.2",
+    "@electron-forge/maker-dmg": "^6.4.2",
+    "@electron-forge/plugin-webpack": "^6.4.2",
+    "ts-loader": "^9.5.0",
+    "css-loader": "^6.8.1",
+    "style-loader": "^3.3.3",
+    "electron-devtools-installer": "^3.2.0"
+  }
+}

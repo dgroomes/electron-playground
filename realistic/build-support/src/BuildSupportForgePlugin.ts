@@ -7,7 +7,6 @@ import {
     StartResult
 } from "@electron-forge/shared-types";
 import {Configuration, Watching, webpack} from "webpack";
-// @ts-ignore - This complains and wants the esModuleInterop flag, but I already have that configured. I think it might be a problem because we're using ts-node. This problem might go away if we exact this plugin to a separate package/module.
 import WebpackDevServer from "webpack-dev-server";
 import {WebpackPluginConfig} from "@electron-forge/plugin-webpack";
 import WebpackConfigGenerator from "@electron-forge/plugin-webpack/dist/WebpackConfig";
@@ -29,8 +28,8 @@ import {webpackRunPromisified, webpackWatchPromisified} from "./webpack-util";
  *   - https://github.com/electron/forge/blob/b4f6dd9f8da7ba63099e4b802c59d1f56feca0cc/packages/plugin/webpack/src/WebpackPlugin.ts#L309
  *   - https://github.com/electron/forge/blob/b4f6dd9f8da7ba63099e4b802c59d1f56feca0cc/packages/plugin/webpack/src/WebpackPlugin.ts#L311
  */
-export class ProjectForgePlugin extends PluginBase<WebpackPluginConfig> {
-    name: string = "ProjectForgePlugin";
+export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
+    name: string = "BuildSupportForgePlugin";
 
     // This is the root directory of the project itself.
     private rootDir: string;
@@ -50,7 +49,7 @@ export class ProjectForgePlugin extends PluginBase<WebpackPluginConfig> {
     private prodMainConfig: Configuration;
     private prodRendererConfig: Configuration[];
     private webpackWatching: Watching;
-    private readonly port : number;
+    private readonly port: number;
 
     constructor(config: WebpackPluginConfig) {
         super(config);
@@ -79,7 +78,7 @@ export class ProjectForgePlugin extends PluginBase<WebpackPluginConfig> {
      * a more appropriate hook to do this but there are only a few hooks.
      */
     private async secondInit() {
-        console.log("ProjectForgePlugin.secondInit() called");
+        console.log("BuildSupportForgePlugin.secondInit() called");
         this.devMainConfig = await this.devConfigGenerator.getMainConfig();
         this.devRendererConfig = await this.devConfigGenerator.getRendererConfig(this.config.renderer.entryPoints);
         this.prodMainConfig = await this.prodConfigGenerator.getMainConfig();

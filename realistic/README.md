@@ -21,6 +21,10 @@ also using webpack in this project, which I think is a natural choice because El
 [OpenJS Foundation](https://openjsf.org/).
 
 This project is me learning the supporting tooling that it takes to develop and build a realistic Electron application.
+By realistic, I don't mean universal, I just mean that this project is the result of a real effort to use and learn the
+tooling, and to come up with a design that I would be comfortable using in a real project. There is a large diversity
+of other project styles for Electron apps, especially including [electron-builder](https://github.com/electron-userland/electron-builder),
+which is a popular alternative to Electron Forge.
 
 
 ## Instructions
@@ -29,19 +33,26 @@ Follow these instructions to build and run the app.
 
 1. Pre-requisite: Node.js
     * I used Node v20
-2. Install dependencies:
+2. Pre-requisite: `build-support`
+    * **Important**: The `build-support` library must be built before you can develop the main application. Follow the
+    instructions in the [`build-support` README](build-support/README.md). You only need to do this the first time and
+     then any time you change `build-support`. Re-install it with the following command.
+    * ```shell
+      npm install --save-dev ./build-support/electron-playground_realistic_build-support-1.0.0.tgz
+      ```
+3. Install dependencies
     * ```shell
       npm install
       ```
-3. Run the app:
+4. Continuously build and run the app
     * ```shell
       npm start
       ```
-4. Package the app:
+5. Make the app distribution
     * ```shell
       npm run make
       ```
-    * You will then need to find the `.dmg` file in the `out` directory and install it.
+  * You will then need to find the `.dmg` file in the `out` directory and install it.
 
 
 ## Instructions for React DevTools
@@ -75,11 +86,6 @@ Follows these instructions to install and run React Developer Tools in standalon
    * ```shell
      npm run start:react-devtools
      ```
-
-
-## Notes
-
-https://www.electronforge.io/config/plugins/webpack
 
 
 ## Wish List
@@ -137,16 +143,15 @@ General clean-ups, TODOs and things I wish to implement for this project:
   `resolveForgeConfig` and `packageAfterCopy` hooks.
     * DONE Implement the effect of `resolveForgeConfig`: ignore everything but `.webpack/` during packaging.
     * DONE Implement the effect of `packageAfterCopy`.
-* [ ] IN PROGRESS `ProjectForgePlugin`. Turn the `MyForgeWebpackPlugin` into a project-specific plugin. This plugin is tailored to
+* [x] DONE `ProjectForgePlugin`. Turn the `MyForgeWebpackPlugin` into a project-specific plugin. This plugin is tailored to
   the needs of the project, going further than just webpack-specific things. This is a trade-off. It gives up the generic
   quality of the plugin code (and thus "off-the-shelf reusability") but it removes layers of indirection (good). For
   example, there won't be a need for webpack-merge, or the merging/resolving of the Forge config in the `resolveForConfig`
   hook. 
     * DONE Rename and re-doc
     * DONE Combine config
-    * Consider starting Electron Forge from the Node API instead of the CLI via start script. I'd like to get rid of the
+    * ABANDON (No this is too odd) Consider starting Electron Forge from the Node API instead of the CLI via start script. I'd like to get rid of the
       `forge.config.ts` file if possible. The project plugin is the monolithic entity, including config.
-    * More?
 * [ ] SKIP Drop the `WebpackConfig.ts` code and use my own webpack config (this is phase 2 of the overall custom plugin)
     * Update: maybe I won't do this. The AssetRelocatorPatch is a particularly nasty implementation detail. I don't want
       to maintain that.
@@ -158,7 +163,7 @@ General clean-ups, TODOs and things I wish to implement for this project:
   for a realistic project.
 * [x] DONE Remove WebpackRecoverStatsAndInfraLoggingConfigPlugin when we're confident we're completely done with the Forge
   webpack plugin.
-* [ ] De-scope `ts-node` and the TS-based config files. While I really like the ability to author the Forge and webpack
+* [x] DONE (I went with a `build-support` library) De-scope `ts-node` and the TS-based config files. While I really like the ability to author the Forge and webpack
   config files in TypeScript, it comes with extra build-time complexity that I don't want to pay for, especially in this
   project because this is an Electron demo and not a Node "custom module loader for an alternative language" demo.
   I'm really glad I got to learn and use these concepts (`ts-node`, and rechoir, [Node module loaders and hooks](https://nodejs.org/api/module.html#customization-hooks))

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
-This script generates the `package.json` file for this project. Run it with `node package-json.mjs` or `./package-json.mjs`.
+This script generates the `package.json` files for this project. Run it with `node package-json.mjs` or `./package-json.mjs`.
 
 Using a JavaScript file to generate the `package.json` file gives us a solution for commenting the many dependencies,
 scripts, and other configuration. npm will likely not support a solution for providing comments in the `package.json`
@@ -20,14 +20,6 @@ const versions = {
     electron: "^27.0.4", // Electron releases: https://releases.electronjs.org/releases/stable
     electronForge: "^6.4.2", // Electron Forge releases: https://github.com/electron/forge/releases
     tsLoader: "^9.5.0", // ts-loader releases: https://github.com/TypeStrong/ts-loader/releases
-
-    // ts-node releases: https://github.com/TypeStrong/ts-node/releases
-    //
-    // Be careful, ts-node is an optional transitive peer dependency of Electron Forge (although I don't think it's actually
-    // declared as a peer dependency). You need to be careful when selecting the version. ts-node is needed by rechoir,
-    // which is used to transpile TypeScript-based build scripts like 'forge.config.ts'.
-    tsNode: "^10.9.1",
-
     react: "^18.2.0", // React releases: https://legacy.reactjs.org/versions
     reactTypes: "^18.2.37", // @types/react releases: https://www.npmjs.com/package/@types/react
     reactDomTypes: "^18.2.15", // @types/react-dom releases: https://www.npmjs.com/package/@types/react-dom
@@ -36,11 +28,32 @@ const versions = {
     styleLoader: "^3.3.3", // style-loader releases: https://github.com/webpack-contrib/style-loader/releases
 };
 
-// Define a package.json structure using an object.
-// We can add comments to explain each section and its purpose.
-const packageJsonContent = {
+/**
+ * Generate a 'package.json' file.
+ *
+ * @param directory The directory to write the 'package.json' file to.
+ * @param dryRun If true, the 'package.json' file will not be written.
+ * @param packageJsonContent The content of the 'package.json' file, as a JavaScript object.
+ */
+function generatePackageJson(directory, dryRun, packageJsonContent) {
+    const packageJsonString = JSON.stringify(packageJsonContent, null, 2) + "\n";
+    const path = directory + "/package.json";
+
+    console.log(`Writing 'package.json' file to '${path}'...`);
+    if (dryRun) {
+        console.log("DRY RUN. File not written.");
+        return;
+    }
+
+    fs.writeFile(path, packageJsonString, (err) => {
+        if (err) throw new Error(`Failed to write 'package.json' file to '${path}': ${err}`);
+    });
+}
+
+generatePackageJson(".", false, {
     name: "electron-playground_realistic",
     version: "1.0.0",
+    description: "A demo Electron app showing a realistic project setup supported by tooling like Electron Forge and webpack.",
     main: ".webpack/main",
     scripts: {
         start: "DEBUG=true electron-forge start",
@@ -58,28 +71,69 @@ const packageJsonContent = {
         "react-dom": versions.react,
     },
     devDependencies: {
+        /*
+        The "file:" prefix is the form for declaring a dependency on a local package. The 'electron-playground_realistic_build-support-1.0.0.tgz'
+        file is not actually checked into Git; you must build it locally as a prerequisite to building the root project.
+        See the README in 'build-support/' for instructions.
+
+        Tip: You don't have to handwrite a dependency declaration like this. You can still use the familiar 'npm install'
+        command, just point to the relative path of the '.tgz' file but make sure to include a leading './' in the path
+        otherwise npm will interpret it as a package name and try to download it from the npm registry. You'll get a 404.
+        Here is the command I used:
+
+            npm install --save-dev ./build-support/electron-playground_realistic_build-support-1.0.0.tgz
+
+        */
+        "electron-playground_realistic_build-support": "file:build-support/electron-playground_realistic_build-support-1.0.0.tgz",
+
+        /*
+        WORKAROUND. There is a quirky behavior in Electron Forge that we have to workaround. Electron Forge has some
+        special introspective code that looks for the "electron" package among dev dependencies. I think it is literally
+        inspecting either the package.json or the package-lock.json file. Unfortunately, it doesn't use a smart algorithm
+        because it's not finding "electron" even though it's included as a transitive dev dependency by way of the dev
+        dependency on "electron-playground_realistic_build-support". The defect presents itself with this error:
+
+            [FAILED] Could not find any Electron packages in devDependencies
+
+            An unhandled rejection has occurred inside Forge:
+            Error: Could not find any Electron packages in devDependencies
+            at getElectronModuleName (/Users/dave/repos/personal/electron-playground/realistic/node_modules/@electron-forge/core-utils/dist/electron-version.js:51:15)
+
+        This same issue happens when you try to use Electron Forge with an npm workspaces-based project (something I
+        tried for a while and failed). See this related issue: https://github.com/electron/forge/issues/2306.
+
+        The workaround is to just declare "electron" as a dev dependency.
+        */
+        electron: versions.electron,
+
+        "@types/react": versions.reactTypes,
+        "@types/react-dom": versions.reactDomTypes,
+    },
+});
+
+generatePackageJson("build-support", false, {
+    name: "electron-playground_realistic_build-support",
+    version: "1.0.0",
+    private: true,
+    exports: {
+        "./plugin": "./dist/BuildSupportForgePlugin.js",
+        "./config": "./dist/build-support-forge-config.js"
+    },
+    scripts: {
+        // The 'build-support' library has a small amount of source code, and it should rarely change. We can afford
+        // to use the TypeScript compiler ('tsc') directly to transpile the source code into JavaScript instead of using
+        // a more sophisticated build tool like webpack. I don't want to deal with an extra webpack configuration.
+        build: "tsc",
+    },
+    devDependencies: {
+        typescript: versions.typescript
+    },
+    dependencies: {
+        electron: versions.electron,
         "@electron-forge/cli": versions.electronForge,
         "@electron-forge/maker-dmg": versions.electronForge,
         "@electron-forge/plugin-webpack": versions.electronForge,
-        electron: versions.electron,
-
-        // 'ts-loader' enables webpack to transpile TypeScript source code into JavaScript.
         "ts-loader": versions.tsLoader,
-
-        // 'ts-node' lets us write most of our development scripts in TypeScript. For example, we can write a
-        // 'forge.config.ts' file instead of a 'forge.config.js' file. I find this really helpful because it helps us
-        // discover the APIs of Forge and webpack using auto-completions. See the related discussions about 'ts-node' in
-        // Electron Forge:
-        //  - https://github.com/electron/forge/pull/2993
-        //  - https://github.com/electron/forge/pull/3016
-        //
-        // It's an optional dependency We could omit it and write our scripts in JavaScript instead.
-        "ts-node": versions.tsNode,
-
-        typescript: versions.typescript,
-        "@types/react": versions.reactTypes,
-        "@types/react-dom": versions.reactDomTypes,
-
         "css-loader": versions.cssLoader,
         "style-loader": versions.styleLoader,
 
@@ -88,13 +142,4 @@ const packageJsonContent = {
         //  reference a useful third-party solution: https://github.com/MarshallOfSound/electron-devtools-installer
         "electron-devtools-installer": versions.electronDevtoolsInstaller,
     },
-};
-
-// Convert to a formatted JSON string.
-const packageJsonString = JSON.stringify(packageJsonContent, null, 2) + "\n";
-
-// Write the 'package.json' file to disk.
-fs.writeFile("package.json", packageJsonString, (err) => {
-    if (err) throw new Error(`Failed to write 'package.json' file: ${err}`);
-    console.log("'package.json' has been generated!");
 });

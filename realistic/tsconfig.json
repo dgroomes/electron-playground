@@ -19,5 +19,7 @@ See the official reference documentation for tsconfig: https://www.typescriptlan
     },
     "jsx": "react"
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*"
+  ]
 }

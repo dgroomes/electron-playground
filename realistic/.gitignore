@@ -2,3 +2,5 @@ node_modules/
 .webpack/
 # Electron Forge puts the packaged files in 'out/'
 out/
+dist/
+electron-playground_realistic_build-support-*.tgz
