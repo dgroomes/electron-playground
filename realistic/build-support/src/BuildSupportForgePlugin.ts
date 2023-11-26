@@ -6,7 +6,7 @@ import {
     StartOptions,
     StartResult
 } from "@electron-forge/shared-types";
-import {Configuration, Watching, webpack, DefinePlugin} from "webpack";
+import {Configuration, DefinePlugin, Watching, webpack} from "webpack";
 import WebpackDevServer from "webpack-dev-server";
 import WebpackConfigGenerator from "./WebpackConfigGenerator";
 import * as console from "console";
@@ -14,6 +14,7 @@ import * as path from "path";
 import {webpackRunPromisified, webpackWatchPromisified} from "./webpack-util";
 import {WebpackPluginConfig, WebpackPluginEntryPoint} from "./WebpackPluginConfig";
 import {isLocalWindow, isNoWindow} from "./rendererTypeUtils";
+import {DevelopmentEnvStrategy, ProductionEnvStrategy} from "./EnvStrategy";
 
 /**
  * A custom Electron Forge plugin purpose-built for this project. This plugin is not designed as a generic and reusable
@@ -68,8 +69,8 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
     init(_dir: string, _config: ResolvedForgeConfig) {
         this.rootDir = _dir;
         this.webpackOutputDir = path.resolve(this.rootDir, '.webpack');
-        this.devConfigGenerator = new WebpackConfigGenerator(this.config, this.rootDir, false);
-        this.prodConfigGenerator = new WebpackConfigGenerator(this.config, this.rootDir, true);
+        this.devConfigGenerator = new WebpackConfigGenerator(this.config, this.rootDir, new DevelopmentEnvStrategy());
+        this.prodConfigGenerator = new WebpackConfigGenerator(this.config, this.rootDir, new ProductionEnvStrategy());
         super.init(this.rootDir, _config);
     }
 

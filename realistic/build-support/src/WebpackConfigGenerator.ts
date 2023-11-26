@@ -2,6 +2,7 @@ import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import webpack, {Configuration, WebpackPluginInstance} from 'webpack';
 import {merge as webpackMerge} from 'webpack-merge';
+import {EnvStrategy} from './EnvStrategy';
 
 import {
   WebpackPluginConfig,
@@ -15,8 +16,6 @@ import {
   isPreloadOnly,
   isPreloadOnlyEntries
 } from './rendererTypeUtils';
-
-type WebpackMode = 'production' | 'development';
 
 enum RendererTarget {
   Web,
@@ -44,24 +43,19 @@ function rendererTargetToWebpackTarget(target: RendererTarget): WebpackTarget {
 }
 
 export default class WebpackConfigGenerator {
-  private readonly isProd: boolean;
 
   private pluginConfig: WebpackPluginConfig;
-
   private readonly webpackDir: string;
-  private readonly mode: WebpackMode;
+  private envStrategy: EnvStrategy;
 
-  constructor(pluginConfig: WebpackPluginConfig, projectDir: string, isProd: boolean) {
+  constructor(pluginConfig: WebpackPluginConfig, projectDir: string, envStrategy: EnvStrategy) {
     if (!pluginConfig.renderer.entryPoints || !Array.isArray(pluginConfig.renderer.entryPoints)) {
       throw new Error('Required config option "renderer.entryPoints" has not been defined');
     }
 
     this.pluginConfig = pluginConfig;
     this.webpackDir = path.resolve(projectDir, '.webpack');
-    this.isProd = isProd;
-    this.mode = this.isProd ? 'production' : 'development';
-
-    console.debug('Config mode:', this.mode);
+    this.envStrategy = envStrategy;
   }
 
   async getRendererConfig(entryPoints: WebpackPluginEntryPoint[]): Promise<Configuration[]> {
@@ -103,13 +97,13 @@ export default class WebpackConfigGenerator {
   private buildRendererBaseConfig(target: RendererTarget): webpack.Configuration {
     return {
       target: rendererTargetToWebpackTarget(target),
-      devtool: this.isProd ? 'source-map' : 'eval-source-map',
-      mode: this.mode,
+      devtool: this.envStrategy.devtool(),
+      mode: this.envStrategy.mode(),
       output: {
         path: path.resolve(this.webpackDir, 'renderer'),
         filename: '[name]/index.js',
         globalObject: 'self',
-        ...(this.isProd ? {} : { publicPath: '/' }),
+        publicPath: this.envStrategy.publicPath(),
       },
       node: {
         __dirname: false,
@@ -135,7 +129,7 @@ export default class WebpackConfigGenerator {
       path: path.resolve(this.webpackDir, 'renderer'),
       filename: '[name]/index.js',
       globalObject: 'self',
-      ...(this.isProd ? {} : { publicPath: '/' }),
+      publicPath: this.envStrategy.publicPath(),
     };
     const plugins: webpack.WebpackPluginInstance[] = [];
 
@@ -180,7 +174,7 @@ export default class WebpackConfigGenerator {
         path: path.resolve(this.webpackDir, 'renderer'),
         filename: '[name]/preload.js',
         globalObject: 'self',
-        ...(this.isProd ? {} : { publicPath: '/' }),
+        publicPath: this.envStrategy.publicPath(),
       },
       plugins: target === RendererTarget.ElectronPreload ? [] : [new webpack.ExternalsPlugin('commonjs2', externals)],
     };
