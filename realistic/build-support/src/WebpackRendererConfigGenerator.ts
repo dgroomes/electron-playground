@@ -82,11 +82,11 @@ export default class WebpackRendererConfigGenerator {
 
     const rendererConfigs =
       [
-        this.buildRendererConfigs(entryPointsForTarget.web, RendererTarget.Web),
-        this.buildRendererConfigs(entryPointsForTarget.electronRenderer, RendererTarget.ElectronRenderer),
-        this.buildRendererConfigs(entryPointsForTarget.electronPreload, RendererTarget.ElectronPreload),
-        this.buildRendererConfigs(entryPointsForTarget.sandboxedPreload, RendererTarget.SandboxedPreload),
-      ].reduce((configs, allConfigs) => allConfigs.concat(configs));
+        this.buildRendererConfig(entryPointsForTarget.web, RendererTarget.Web),
+        this.buildRendererConfig(entryPointsForTarget.electronRenderer, RendererTarget.ElectronRenderer),
+        this.buildRendererConfig(entryPointsForTarget.electronPreload, RendererTarget.ElectronPreload),
+        this.buildRendererConfig(entryPointsForTarget.sandboxedPreload, RendererTarget.SandboxedPreload),
+      ].filter(config => config !== null);
 
     return rendererConfigs.filter(function <T>(item: T | null): item is T {
       return item !== null;
@@ -180,21 +180,18 @@ export default class WebpackRendererConfigGenerator {
     return webpackMerge(baseConfig, rendererConfig || {}, config);
   }
 
-  /**
-   * TODO this doesn't need to return an array, just one element.
-   */
-  private buildRendererConfigs(entryPoints: WebpackPluginEntryPoint[], target: RendererTarget): webpack.Configuration[] | null[] {
+  private buildRendererConfig(entryPoints: WebpackPluginEntryPoint[], target: RendererTarget): webpack.Configuration | null {
     if (entryPoints.length === 0) {
-      return [];
+      return null;
     }
     if (target === RendererTarget.Web || target === RendererTarget.ElectronRenderer) {
-      return [this.buildRendererConfigForWebOrRendererTarget(entryPoints, target)];
+      return this.buildRendererConfigForWebOrRendererTarget(entryPoints, target);
     } else if (target === RendererTarget.ElectronPreload || target === RendererTarget.SandboxedPreload) {
       if (!isPreloadOnlyEntries(entryPoints)) {
         throw new Error('Invalid renderer entry point detected.');
       }
 
-      return [this.buildRendererConfigForPreloadOrSandboxedPreloadTarget(entryPoints, target)];
+      return this.buildRendererConfigForPreloadOrSandboxedPreloadTarget(entryPoints, target);
     } else {
       throw new Error('Invalid renderer entry point detected.');
     }
