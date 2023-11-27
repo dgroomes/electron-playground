@@ -42,7 +42,7 @@ function rendererTargetToWebpackTarget(target: RendererTarget): WebpackTarget {
   }
 }
 
-export default class WebpackConfigGenerator {
+export default class WebpackRendererConfigGenerator {
 
   private pluginConfig: WebpackPluginConfig;
   private readonly webpackDir: string;
@@ -58,7 +58,7 @@ export default class WebpackConfigGenerator {
     this.envStrategy = envStrategy;
   }
 
-  async getRendererConfig(entryPoints: WebpackPluginEntryPoint[]): Promise<Configuration[]> {
+  generateConfig(entryPoints: WebpackPluginEntryPoint[]): Configuration[] {
     const entryPointsForTarget = {
       web: [] as (WebpackPluginEntryPointLocalWindow | WebpackPluginEntryPoint)[],
       electronRenderer: [] as (WebpackPluginEntryPointLocalWindow | WebpackPluginEntryPoint)[],
@@ -80,14 +80,13 @@ export default class WebpackConfigGenerator {
       }
     }
 
-    const rendererConfigs = await Promise.all(
+    const rendererConfigs =
       [
-        await this.buildRendererConfigs(entryPointsForTarget.web, RendererTarget.Web),
-        await this.buildRendererConfigs(entryPointsForTarget.electronRenderer, RendererTarget.ElectronRenderer),
-        await this.buildRendererConfigs(entryPointsForTarget.electronPreload, RendererTarget.ElectronPreload),
-        await this.buildRendererConfigs(entryPointsForTarget.sandboxedPreload, RendererTarget.SandboxedPreload),
-      ].reduce((configs, allConfigs) => allConfigs.concat(configs))
-    );
+        this.buildRendererConfigs(entryPointsForTarget.web, RendererTarget.Web),
+        this.buildRendererConfigs(entryPointsForTarget.electronRenderer, RendererTarget.ElectronRenderer),
+        this.buildRendererConfigs(entryPointsForTarget.electronPreload, RendererTarget.ElectronPreload),
+        this.buildRendererConfigs(entryPointsForTarget.sandboxedPreload, RendererTarget.SandboxedPreload),
+      ].reduce((configs, allConfigs) => allConfigs.concat(configs));
 
     return rendererConfigs.filter(function <T>(item: T | null): item is T {
       return item !== null;
@@ -113,10 +112,10 @@ export default class WebpackConfigGenerator {
     };
   }
 
-  private async buildRendererConfigForWebOrRendererTarget(
+  private buildRendererConfigForWebOrRendererTarget(
     entryPoints: WebpackPluginEntryPoint[],
     target: RendererTarget.Web | RendererTarget.ElectronRenderer
-  ): Promise<Configuration | null> {
+  ): Configuration | null {
     if (!isLocalOrNoWindowEntries(entryPoints)) {
       throw new Error('Invalid renderer entry point detected.');
     }
@@ -150,10 +149,10 @@ export default class WebpackConfigGenerator {
     return webpackMerge(baseConfig, rendererConfig() || {}, { entry, output, plugins });
   }
 
-  private async buildRendererConfigForPreloadOrSandboxedPreloadTarget(
+  private buildRendererConfigForPreloadOrSandboxedPreloadTarget(
     entryPoints: WebpackPluginEntryPointPreloadOnly[],
     target: RendererTarget.ElectronPreload | RendererTarget.SandboxedPreload
-  ): Promise<Configuration | null> {
+  ): Configuration | null {
     if (entryPoints.length === 0) {
       return null;
     }
@@ -181,11 +180,11 @@ export default class WebpackConfigGenerator {
     return webpackMerge(baseConfig, rendererConfig || {}, config);
   }
 
-  private async buildRendererConfigs(entryPoints: WebpackPluginEntryPoint[], target: RendererTarget): Promise<Promise<webpack.Configuration | null>[]> {
+  private buildRendererConfigs(entryPoints: WebpackPluginEntryPoint[], target: RendererTarget): webpack.Configuration[] | null[] {
     if (entryPoints.length === 0) {
       return [];
     }
-    const rendererConfigs = [];
+    const rendererConfigs : Configuration[] = [] ;
     if (target === RendererTarget.Web || target === RendererTarget.ElectronRenderer) {
       rendererConfigs.push(this.buildRendererConfigForWebOrRendererTarget(entryPoints, target));
       return rendererConfigs;

@@ -6,15 +6,15 @@ import {
     StartOptions,
     StartResult
 } from "@electron-forge/shared-types";
-import {Configuration, DefinePlugin, Watching, webpack} from "webpack";
+import {Configuration, Watching, webpack} from "webpack";
 import WebpackDevServer from "webpack-dev-server";
-import WebpackConfigGenerator from "./WebpackConfigGenerator";
+import WebpackRendererConfigGenerator from "./WebpackRendererConfigGenerator";
 import * as console from "console";
 import * as path from "path";
 import {webpackRunPromisified, webpackWatchPromisified} from "./webpack-util";
-import {WebpackPluginConfig, WebpackPluginEntryPoint} from "./WebpackPluginConfig";
-import {isLocalWindow, isNoWindow} from "./rendererTypeUtils";
-import {DevelopmentEnvStrategy, EnvStrategy, ProductionEnvStrategy} from "./EnvStrategy";
+import {WebpackPluginConfig} from "./WebpackPluginConfig";
+import {DevelopmentEnvStrategy, ProductionEnvStrategy} from "./EnvStrategy";
+import WebpackMainConfigGenerator from "./WebpackMainConfigGenerator";
 
 /**
  * A custom Electron Forge plugin purpose-built for this project. This plugin is not designed as a generic and reusable
@@ -44,8 +44,6 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
     */
     private webpackOutputDir: string;
     private alreadyStarted: boolean = false;
-    private devConfigGenerator: WebpackConfigGenerator;
-    private prodConfigGenerator: WebpackConfigGenerator;
     private devMainConfig: Configuration;
     private devRendererConfig: Configuration[];
     private prodMainConfig: Configuration;
@@ -62,7 +60,6 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
         // Make sure to bind class methods to this instance so that they don't become headless. In particular, the startLogic()
         // is called with a different 'this' context in the Electron Forge code. See https://github.com/electron/forge/blob/61d398abde51a21e280e59d319d5a77dbf3f7936/packages/api/core/src/util/plugin-interface.ts#L154
         this.startLogic = this.startLogic.bind(this);
-        this.secondInit = this.secondInit.bind(this);
         this.buildForProduction = this.buildForProduction.bind(this);
         this.registerOverallExitHandlerUponElectronExit = this.registerOverallExitHandlerUponElectronExit.bind(this);
     }
@@ -71,73 +68,18 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
     init(_dir: string, _config: ResolvedForgeConfig) {
         this.rootDir = _dir;
         this.webpackOutputDir = path.resolve(this.rootDir, '.webpack');
-        this.devConfigGenerator = new WebpackConfigGenerator(this.config, this.rootDir, this.devStrategy);
-        this.prodConfigGenerator = new WebpackConfigGenerator(this.config, this.rootDir, this.prodStrategy);
+
+        const devMainConfigGenerator = new WebpackMainConfigGenerator(this.config.mainConfig(), this.rootDir, this.devStrategy, this.config.renderer, this.port);
+        const devRendererConfigGenerator = new WebpackRendererConfigGenerator(this.config, this.rootDir, this.devStrategy);
+        const prodMainConfigGenerator = new WebpackMainConfigGenerator(this.config.mainConfig(), this.rootDir, this.prodStrategy, this.config.renderer, this.port);
+        const prodRendererConfigGenerator = new WebpackRendererConfigGenerator(this.config, this.rootDir, this.prodStrategy);
+
+        this.devMainConfig = devMainConfigGenerator.generateConfig();
+        this.devRendererConfig = devRendererConfigGenerator.generateConfig(this.config.renderer.entryPoints);
+        this.prodMainConfig = prodMainConfigGenerator.generateConfig()
+        this.prodRendererConfig = prodRendererConfigGenerator.generateConfig(this.config.renderer.entryPoints);
+
         super.init(this.rootDir, _config);
-    }
-
-    /**
-     * Unfortunately, the Electron Forge plugin framework does not support async initialization. We need this because
-     * the WebpackConfigGenerator is async (which itself is not cool, let's visit that later). So we'll cheat by inventing
-     * a second init-style method, and we'll wire it in via the "generateAssets" hook. This is a hack! I wish there was
-     * a more appropriate hook to do this but there are only a few hooks.
-     */
-    private async secondInit() {
-        console.log("BuildSupportForgePlugin.secondInit() called");
-        this.devMainConfig = this.getMainConfig(this.devStrategy);
-        this.devRendererConfig = await this.devConfigGenerator.getRendererConfig(this.config.renderer.entryPoints);
-        this.prodMainConfig = this.getMainConfig(this.prodStrategy);
-        this.prodRendererConfig = await this.prodConfigGenerator.getRendererConfig(this.config.renderer.entryPoints);
-    }
-
-    /**
-     * This was ported from the WebpackConfigGenerator. It's a bit awkward right now.
-     * @private
-     */
-    private getMainConfig(envStrategy: EnvStrategy) {
-        const mainConfig = this.config.mainConfig();
-        mainConfig.entry = path.resolve(this.rootDir, "./src/main.ts");
-        mainConfig.output.path = path.resolve(this.webpackOutputDir, 'main');
-        mainConfig.mode =  envStrategy.mode()
-        mainConfig.plugins = [new DefinePlugin(this.getDefines(envStrategy))];
-        return mainConfig;
-    }
-
-    /**
-     * This was ported from the WebpackConfigGenerator. It's a bit awkward right now.
-     */
-    private getDefines(envStrategy: EnvStrategy): Record<string, string> {
-        const defines: Record<string, string> = {};
-        for (const entryPoint of this.config.renderer.entryPoints) {
-            const entryKey = this.toEnvironmentVariable(entryPoint);
-            if (isLocalWindow(entryPoint)) {
-                defines[entryKey] = envStrategy.rendererEntryPoint(entryPoint.name, 'index.html', this.port);
-            } else {
-                defines[entryKey] = envStrategy.rendererEntryPoint(entryPoint.name, 'index.js', this.port);
-            }
-            defines[`process.env.${entryKey}`] = defines[entryKey];
-
-            const preloadDefineKey = this.toEnvironmentVariable(entryPoint, true);
-            defines[preloadDefineKey] = this.getPreloadDefine(entryPoint, envStrategy);
-            defines[`process.env.${preloadDefineKey}`] = defines[preloadDefineKey];
-        }
-
-        return defines;
-    }
-
-    private toEnvironmentVariable(entryPoint: WebpackPluginEntryPoint, preload = false): string {
-        const suffix = preload ? '_PRELOAD_WEBPACK_ENTRY' : '_WEBPACK_ENTRY';
-        return `${entryPoint.name.toUpperCase().replace(/ /g, '_')}${suffix}`;
-    }
-
-    private getPreloadDefine(entryPoint: WebpackPluginEntryPoint, envStrategy: EnvStrategy): string {
-        if (isNoWindow(entryPoint)) {
-            // If this entry-point has no configured preload script just map this constant to `undefined`
-            // so that any code using it still works.  This makes quick-start / docs simpler.
-            return 'undefined';
-        }
-
-        return envStrategy.preloadDefine(this.webpackOutputDir, entryPoint);
     }
 
     /**
@@ -172,7 +114,6 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
      */
     getHooks(): ForgeMultiHookMap {
         return {
-            generateAssets: this.secondInit,
             prePackage: this.buildForProduction,
             postStart: this.registerOverallExitHandlerUponElectronExit
         };
