@@ -171,7 +171,13 @@ General clean-ups, TODOs and things I wish to implement for this project:
       the common code and utility functions separate from the prod/dev stuff (that got too co-mingled in the official
       plugin). `webpack-util.ts` has worked well, I might push more webpack-specific stuff into there.
     * DONE dev/prod strategy objects.
-    * IN PROGRESS Keep reducing.
+    * IN PROGRESS Remove support for multiple preload. Let's just fixate to one for now. I need to get a handle on the code.
+       * `WebpackPluginEntryPointPreloadOnly` is modelled misleadingly. That type, in practice, actually applies to entry
+         points that do indeed have html or js. Similarly, look at the contrasting `isPreloadOnly` and `hasPreloadScript`
+         which are type guards for `WebpackPluginEntryPointPreloadOnly`.
+         * DONE Remove support for "preload with configuration". This takes a special case in the code and we
+           don't use it.
+     * Keep reducing.
     * What is ExternalsPlugin (used in the preload entrypoint)?
 * [ ] Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.
 * [x] DONE Hot reloading for styles isn't working. That's totally my bad, I knew this and took out the style loader hastily.

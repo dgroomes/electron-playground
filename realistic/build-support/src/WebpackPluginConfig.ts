@@ -63,6 +63,7 @@ export interface WebpackPluginEntryPointNoWindow extends WebpackPluginEntryPoint
   js: string;
 }
 
+// Is WebpackPluginEntryPointNoWindow ever used by my app? Never. TODO remove it?
 export type WebpackPluginEntryPoint = WebpackPluginEntryPointLocalWindow | WebpackPluginEntryPointNoWindow | WebpackPluginEntryPointPreloadOnly;
 
 export interface WebpackPreloadEntryPoint {
@@ -76,11 +77,6 @@ export interface WebpackPreloadEntryPoint {
    * entry files into your application.
    */
   prefixedEntries?: string[];
-  /**
-   * The optional webpack config for your preload process.
-   * Defaults to the renderer webpack config if blank.
-   */
-  config?: Configuration;
 }
 
 export interface WebpackPluginRendererConfig {
