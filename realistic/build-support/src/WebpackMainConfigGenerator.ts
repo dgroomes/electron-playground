@@ -2,8 +2,12 @@ import path from 'path';
 import {Configuration, DefinePlugin} from 'webpack';
 import {EnvStrategy} from './EnvStrategy';
 
-import {WebpackPluginEntryPoint, WebpackPluginRendererConfig} from './WebpackPluginConfig';
-import {isLocalWindow, isNoWindow} from './rendererTypeUtils';
+import {
+  WebpackPluginEntryPoint,
+  WebpackPluginEntryPointPreloadOnly,
+  WebpackPluginRendererConfig
+} from './WebpackPluginConfig';
+import {isLocalWindow} from './rendererTypeUtils';
 
 // noinspection JSUnusedGlobalSymbols
 export default class WebpackMainConfigGenerator {
@@ -65,12 +69,6 @@ export default class WebpackMainConfigGenerator {
   }
 
   private getPreloadDefine(entryPoint: WebpackPluginEntryPoint, envStrategy: EnvStrategy): string {
-    if (isNoWindow(entryPoint)) {
-      // If this entry-point has no configured preload script just map this constant to `undefined`
-      // so that any code using it still works.  This makes quick-start / docs simpler.
-      return 'undefined';
-    }
-
-    return envStrategy.preloadDefine(this.webpackOutputDir, entryPoint);
+    return envStrategy.preloadDefine(this.webpackOutputDir, entryPoint as WebpackPluginEntryPointPreloadOnly);
   }
 }

@@ -7,11 +7,9 @@ import {EnvStrategy} from './EnvStrategy';
 import {
   WebpackPluginConfig,
   WebpackPluginEntryPoint,
-  WebpackPluginEntryPointLocalWindow,
-  WebpackPluginEntryPointPreloadOnly
+  WebpackPluginEntryPointLocalWindow, WebpackPluginEntryPointPreloadOnly
 } from './WebpackPluginConfig';
 import {
-  isLocalOrNoWindowEntries,
   isLocalWindow,
   isPreloadOnly,
   isPreloadOnlyEntries
@@ -116,9 +114,9 @@ export default class WebpackRendererConfigGenerator {
     entryPoints: WebpackPluginEntryPoint[],
     target: RendererTarget.Web | RendererTarget.ElectronRenderer
   ): Configuration | null {
-    if (!isLocalOrNoWindowEntries(entryPoints)) {
-      throw new Error('Invalid renderer entry point detected.');
-    }
+
+    // This cast is a short term workaround as we eventually thin out the types.
+    const entryPointsCast = entryPoints as (WebpackPluginEntryPointLocalWindow)[];
 
     const entry: webpack.Entry = {};
     const baseConfig: webpack.Configuration = this.buildRendererBaseConfig(target);
@@ -132,7 +130,7 @@ export default class WebpackRendererConfigGenerator {
     };
     const plugins: webpack.WebpackPluginInstance[] = [];
 
-    for (const entryPoint of entryPoints) {
+    for (const entryPoint of entryPointsCast) {
       entry[entryPoint.name] = (entryPoint.prefixedEntries || []).concat([entryPoint.js]);
 
       if (isLocalWindow(entryPoint)) {

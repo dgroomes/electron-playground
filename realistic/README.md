@@ -175,8 +175,9 @@ General clean-ups, TODOs and things I wish to implement for this project:
        * `WebpackPluginEntryPointPreloadOnly` is modelled misleadingly. That type, in practice, actually applies to entry
          points that do indeed have html or js. Similarly, look at the contrasting `isPreloadOnly` and `hasPreloadScript`
          which are type guards for `WebpackPluginEntryPointPreloadOnly`.
-         * DONE Remove support for "preload with configuration". This takes a special case in the code and we
+         * DONE Remove support for "preload with configuration". This takes a special case in the code, and we
            don't use it.
+         * DONE Can I get rid of `WebpackPluginEntryPointNoWindow`?
      * Keep reducing.
     * What is ExternalsPlugin (used in the preload entrypoint)?
 * [ ] Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.
