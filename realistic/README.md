@@ -178,6 +178,8 @@ General clean-ups, TODOs and things I wish to implement for this project:
          * DONE Remove support for "preload with configuration". This takes a special case in the code, and we
            don't use it.
          * DONE Can I get rid of `WebpackPluginEntryPointNoWindow`?
+         * DONE Can I get rid of `WebpackPluginEntryPointPreloadOnly`?
+         * `WebpackPluginEntryPointLocalWindow` and `WebpackPluginEntryPointBase` should go away and only leave `WebpackPluginEntryPoint`
      * Keep reducing.
     * What is ExternalsPlugin (used in the preload entrypoint)?
 * [ ] Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.

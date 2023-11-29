@@ -1,5 +1,4 @@
 import { Configuration } from "webpack";
-import {WebpackPluginEntryPointPreloadOnly} from "./WebpackPluginConfig";
 import path from "path";
 
 
@@ -10,7 +9,7 @@ export interface EnvStrategy {
     mode(): Configuration["mode"];
     devtool(): Configuration["devtool"];
     publicPath(): Configuration["output"]["publicPath"];
-    preloadDefine(webpackOutputDir: string, entryPoint: WebpackPluginEntryPointPreloadOnly): string;
+    preloadDefine(webpackOutputDir: string, entryPointName: string): string;
     rendererEntryPoint(entryPointName: string, basename: string, port: number): string;
 }
 
@@ -27,8 +26,8 @@ export class ProductionEnvStrategy implements EnvStrategy {
         return undefined;
     }
 
-    preloadDefine(webpackOutputDir: string, entryPoint: WebpackPluginEntryPointPreloadOnly): string {
-        return `require('path').resolve(__dirname, '../renderer', '${entryPoint.name}', 'preload.js')`;
+    preloadDefine(_webpackOutputDir: string, entryPointName: string): string {
+        return `require('path').resolve(__dirname, '../renderer', '${entryPointName}', 'preload.js')`;
     }
 
     rendererEntryPoint(entryPointName: string, basename: string, port: number): string {
@@ -50,8 +49,8 @@ export class DevelopmentEnvStrategy implements EnvStrategy {
         return "/";
     }
 
-    preloadDefine(webpackOutputDir: string, entryPoint: WebpackPluginEntryPointPreloadOnly): string {
-        return `'${path.resolve(webpackOutputDir, 'renderer', entryPoint.name, 'preload.js').replace(/\\/g, '\\\\')}'`;
+    preloadDefine(webpackOutputDir: string, entryPointName: string): string {
+        return `'${path.resolve(webpackOutputDir, 'renderer', entryPointName, 'preload.js').replace(/\\/g, '\\\\')}'`;
     }
 
     rendererEntryPoint(entryPointName: string, basename: string, port: number): string {

@@ -49,15 +49,7 @@ export interface WebpackPluginEntryPointLocalWindow extends WebpackPluginEntryPo
   preload?: WebpackPreloadEntryPoint;
 }
 
-export interface WebpackPluginEntryPointPreloadOnly extends WebpackPluginEntryPointBase {
-  /**
-   * Information about the preload script for this entry point.
-   */
-  preload: WebpackPreloadEntryPoint;
-}
-
-// Is WebpackPluginEntryPointNoWindow ever used by my app? Never. TODO remove it?
-export type WebpackPluginEntryPoint = WebpackPluginEntryPointLocalWindow | WebpackPluginEntryPointPreloadOnly;
+export type WebpackPluginEntryPoint = WebpackPluginEntryPointLocalWindow;
 
 export interface WebpackPreloadEntryPoint {
   /**

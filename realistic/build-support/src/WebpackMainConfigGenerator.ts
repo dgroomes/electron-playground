@@ -4,7 +4,6 @@ import {EnvStrategy} from './EnvStrategy';
 
 import {
   WebpackPluginEntryPoint,
-  WebpackPluginEntryPointPreloadOnly,
   WebpackPluginRendererConfig
 } from './WebpackPluginConfig';
 import {isLocalWindow} from './rendererTypeUtils';
@@ -48,15 +47,11 @@ export default class WebpackMainConfigGenerator {
     const defines: Record<string, string> = {};
     for (const entryPoint of this.pluginRendererConfig.entryPoints) {
       const entryKey = this.toEnvironmentVariable(entryPoint);
-      if (isLocalWindow(entryPoint)) {
-        defines[entryKey] = envStrategy.rendererEntryPoint(entryPoint.name, 'index.html', this.port);
-      } else {
-        defines[entryKey] = envStrategy.rendererEntryPoint(entryPoint.name, 'index.js', this.port);
-      }
+      defines[entryKey] = envStrategy.rendererEntryPoint(entryPoint.name, 'index.html', this.port);
       defines[`process.env.${entryKey}`] = defines[entryKey];
 
       const preloadDefineKey = this.toEnvironmentVariable(entryPoint, true);
-      defines[preloadDefineKey] = this.getPreloadDefine(entryPoint, envStrategy);
+      defines[preloadDefineKey] = envStrategy.preloadDefine(this.webpackOutputDir, entryPoint.name);
       defines[`process.env.${preloadDefineKey}`] = defines[preloadDefineKey];
     }
 
@@ -66,9 +61,5 @@ export default class WebpackMainConfigGenerator {
   private toEnvironmentVariable(entryPoint: WebpackPluginEntryPoint, preload = false): string {
     const suffix = preload ? '_PRELOAD_WEBPACK_ENTRY' : '_WEBPACK_ENTRY';
     return `${entryPoint.name.toUpperCase().replace(/ /g, '_')}${suffix}`;
-  }
-
-  private getPreloadDefine(entryPoint: WebpackPluginEntryPoint, envStrategy: EnvStrategy): string {
-    return envStrategy.preloadDefine(this.webpackOutputDir, entryPoint as WebpackPluginEntryPointPreloadOnly);
   }
 }
