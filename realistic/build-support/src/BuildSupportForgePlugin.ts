@@ -34,7 +34,7 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
     name: string = "BuildSupportForgePlugin";
 
     // This is the root directory of the project itself.
-    private rootDir: string;
+    #rootDir: string;
 
     /*
     This is the directory where webpack will write its output files. This is a form of an "out/" or "build/" directory.
@@ -42,20 +42,20 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
     This is not a common convention in the broader ecosystem but let's follow it here (in part because we have to for
     now, because we're still using the WebpackConfigGenerator which hard codes to that convention).
     */
-    private webpackOutputDir: string;
-    private alreadyStarted: boolean = false;
-    private devMainConfig: Configuration;
-    private devRendererConfig: Configuration[];
-    private prodMainConfig: Configuration;
-    private prodRendererConfig: Configuration[];
-    private webpackWatching: Watching;
-    private readonly port: number;
-    private devStrategy = new DevelopmentEnvStrategy();
-    private prodStrategy = new ProductionEnvStrategy();
+    #webpackOutputDir: string;
+    #alreadyStarted: boolean = false;
+    #devMainConfig: Configuration;
+    #devRendererConfig: Configuration[];
+    #prodMainConfig: Configuration;
+    #prodRendererConfig: Configuration[];
+    #webpackWatching: Watching;
+    readonly #port: number;
+    #devStrategy = new DevelopmentEnvStrategy();
+    #prodStrategy = new ProductionEnvStrategy();
 
     constructor(config: WebpackPluginConfig) {
         super(config);
-        this.port = config.port || 3000;
+        this.#port = config.port || 3000;
 
         // Make sure to bind class methods to this instance so that they don't become headless. In particular, the startLogic()
         // is called with a different 'this' context in the Electron Forge code. See https://github.com/electron/forge/blob/61d398abde51a21e280e59d319d5a77dbf3f7936/packages/api/core/src/util/plugin-interface.ts#L154
@@ -66,20 +66,19 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
 
     // noinspection JSUnusedGlobalSymbols
     init(_dir: string, _config: ResolvedForgeConfig) {
-        this.rootDir = _dir;
-        this.webpackOutputDir = path.resolve(this.rootDir, '.webpack');
+        this.#rootDir = _dir;
+        this.#webpackOutputDir = path.resolve(this.#rootDir, '.webpack');
+        const devMainConfigGenerator = new WebpackMainConfigGenerator(this.config.mainConfig(), this.#rootDir, this.#devStrategy, this.config.renderer, this.#port);
+        const devRendererConfigGenerator = new WebpackRendererConfigGenerator(this.config, this.#rootDir, this.#devStrategy);
+        const prodMainConfigGenerator = new WebpackMainConfigGenerator(this.config.mainConfig(), this.#rootDir, this.#prodStrategy, this.config.renderer, this.#port);
+        const prodRendererConfigGenerator = new WebpackRendererConfigGenerator(this.config, this.#rootDir, this.#prodStrategy);
 
-        const devMainConfigGenerator = new WebpackMainConfigGenerator(this.config.mainConfig(), this.rootDir, this.devStrategy, this.config.renderer, this.port);
-        const devRendererConfigGenerator = new WebpackRendererConfigGenerator(this.config, this.rootDir, this.devStrategy);
-        const prodMainConfigGenerator = new WebpackMainConfigGenerator(this.config.mainConfig(), this.rootDir, this.prodStrategy, this.config.renderer, this.port);
-        const prodRendererConfigGenerator = new WebpackRendererConfigGenerator(this.config, this.rootDir, this.prodStrategy);
+        this.#devMainConfig = devMainConfigGenerator.generateConfig();
+        this.#devRendererConfig = devRendererConfigGenerator.generateConfig(this.config.renderer.entryPoints);
+        this.#prodMainConfig = prodMainConfigGenerator.generateConfig()
+        this.#prodRendererConfig = prodRendererConfigGenerator.generateConfig(this.config.renderer.entryPoints);
 
-        this.devMainConfig = devMainConfigGenerator.generateConfig();
-        this.devRendererConfig = devRendererConfigGenerator.generateConfig(this.config.renderer.entryPoints);
-        this.prodMainConfig = prodMainConfigGenerator.generateConfig()
-        this.prodRendererConfig = prodRendererConfigGenerator.generateConfig(this.config.renderer.entryPoints);
-
-        super.init(this.rootDir, _config);
+        super.init(this.#rootDir, _config);
     }
 
     /**
@@ -97,7 +96,7 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
     private async buildForProduction() {
         // Because there is no watching, and no dev servers involved, we can afford to express all webpack 'Configuration'
         // objects into the same webpack compiler object. Then, we just invoke the compiler once. We promisify the call.
-        const config = [this.prodMainConfig, ...this.prodRendererConfig]
+        const config = [this.#prodMainConfig, ...this.#prodRendererConfig]
         const compiler = webpack(config);
         const stats = await webpackRunPromisified(compiler);
         if (stats.hasErrors()) {
@@ -125,11 +124,11 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
     async startLogic(_startOpts: StartOptions): Promise<StartResult> {
         console.log("MyForgeWebpackPlugin.startLogic() called");
 
-        if (this.alreadyStarted) return false;
-        this.alreadyStarted = true;
+        if (this.#alreadyStarted) return false;
+        this.#alreadyStarted = true;
 
         // Compile the main process bundles. The returned promise resolves when the compilation is complete.
-        const mainCompiler = webpack(this.devMainConfig);
+        const mainCompiler = webpack(this.#devMainConfig);
         const compileMainPromise = webpackWatchPromisified(mainCompiler).currentCompilation();
 
         const rendererServer = await this.rendererServer();
@@ -143,7 +142,7 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
      *  Create and configure a webpack compiler and webpack-dev-server for the renderer process bundles.
      */
     private async rendererServer(): Promise<WebpackDevServer> {
-        const compiler = webpack(this.devRendererConfig);
+        const compiler = webpack(this.#devRendererConfig);
 
         const devServerConfig: WebpackDevServer.Configuration = {
             hot: true,
@@ -151,9 +150,9 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
                 writeToDisk: true,
             },
             historyApiFallback: true, // Not sure what this is. I copied it from Forge's own WebpackDevServer config.
-            port: this.port,
+            port: this.#port,
             setupExitSignals: true, // Not sure what this is. I copied it from Forge's own WebpackDevServer config.
-            static: path.resolve(this.webpackOutputDir, "renderer"), // I don't think I should qualify this anymore. Well... I haven't thought through the implications of not using two webpack compilers.
+            static: path.resolve(this.#webpackOutputDir, "renderer"), // I don't think I should qualify this anymore. Well... I haven't thought through the implications of not using two webpack compilers.
             headers: {
                 "Content-Security-Policy": this.config.devContentSecurityPolicy,
             },
@@ -171,7 +170,7 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
     async registerOverallExitHandlerUponElectronExit(_config: ResolvedForgeConfig, electronProcess: ElectronProcess) {
         electronProcess.on('exit', () => {
             if (electronProcess.restarted) return;
-            this.webpackWatching?.close(() => {
+            this.#webpackWatching?.close(() => {
             });
             process.exit();
         });

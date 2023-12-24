@@ -175,7 +175,7 @@ General clean-ups, TODOs and things I wish to implement for this project:
       the common code and utility functions separate from the prod/dev stuff (that got too co-mingled in the official
       plugin). `webpack-util.ts` has worked well, I might push more webpack-specific stuff into there.
     * DONE dev/prod strategy objects.
-    * IN PROGRESS Fix `make` task. There's a problem because Electron Forge has some code to expand fields on the Electron
+    * DONE (nice, true private class fields worked, but unfortunately I can't seem them in the debugger. Similar to [this YouTrack issue](https://youtrack.jetbrains.com/issue/WEB-52294/Javascript-Debugging-show-private-properties-on-objects-in-watches-variables)) Fix `make` task. There's a problem because Electron Forge has some code to expand fields on the Electron
       Forge config object using Lodash (quite dangerous in my estimation but so be it) and it's reaching all the way into
       the webpack config object which has some fields with `$` in them which are used in the DefinesPlugin. We don't
       want this, it errors. The Forge code just indiscriminately expands all fields. I think I should be able to hide
