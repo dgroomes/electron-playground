@@ -175,7 +175,12 @@ General clean-ups, TODOs and things I wish to implement for this project:
       the common code and utility functions separate from the prod/dev stuff (that got too co-mingled in the official
       plugin). `webpack-util.ts` has worked well, I might push more webpack-specific stuff into there.
     * DONE dev/prod strategy objects.
-    * IN PROGRESS Remove support for multiple preload. Let's just fixate to one for now. I need to get a handle on the code.
+    * IN PROGRESS Fix `make` task. There's a problem because Electron Forge has some code to expand fields on the Electron
+      Forge config object using Lodash (quite dangerous in my estimation but so be it) and it's reaching all the way into
+      the webpack config object which has some fields with `$` in them which are used in the DefinesPlugin. We don't
+      want this, it errors. The Forge code just indiscriminately expands all fields. I think I should be able to hide
+      them somehow, make them non-enumerable or whatever.
+    * HOLD Remove support for multiple preload. Let's just fixate to one for now. I need to get a handle on the code.
        * `WebpackPluginEntryPointPreloadOnly` is modelled misleadingly. That type, in practice, actually applies to entry
          points that do indeed have html or js. Similarly, look at the contrasting `isPreloadOnly` and `hasPreloadScript`
          which are type guards for `WebpackPluginEntryPointPreloadOnly`.
