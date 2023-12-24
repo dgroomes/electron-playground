@@ -52,7 +52,11 @@ Follow these instructions to build and run the app.
     * ```shell
       npm run make
       ```
-  * You will then need to find the `.dmg` file in the `out` directory and install it.
+  * You will then need to find the `.zip` file in the `out` directory, unzip it and place it in your `Applications`.
+    This step is hardly useful because the Electron Forge `package` step already did most of the work. We might as well
+    have just zipped it up from a shell script. But, this step serves as a placeholder and reminder for us to replace it
+    with a proper DMG-making step (see the note in the "Wish List" section below about the current defect with the DMG
+    maker).
 
 
 ## Instructions for React DevTools
@@ -169,6 +173,12 @@ General clean-ups, TODOs and things I wish to implement for this project:
   I'm really glad I got to learn and use these concepts (`ts-node`, and rechoir, [Node module loaders and hooks](https://nodejs.org/api/module.html#customization-hooks))
   but now I can de-scope that stuff into a separate project. I don't really want to have the webpack-util or MyForgeWebpackPlugin
   be in the JS though... can I extract it into a sibling npm project/module and then 'link' it or 'pack' it?
+* [x] DONE Replace the DMG Electron Forge maker with the ZIP one. The DMG maker is causing an error for me on Dec 2023 on a fresh
+  `npm install`. The lineage is particularly obsure (a silently failing optional dependency because of macOS being on Python 3.12
+  and/or npm marks previously required dependencies as optional in the lock file?? See <https://github.com/electron/forge/issues/2807#issuecomment-1793508913>
+  and follow the links). The Electron Forge templates don't even use the DMG maker so I don't have a strong foundation
+  to work from here (the templates support some other makers, which is perfectly reasonable: see <https://github.com/electron/forge/blob/335c388278caa339cdcb253516f1b08d7596cf1d/packages/template/webpack-typescript/package.json#L26>).
+  So, we won't outrun official (and "stable") support. Stick to ZIP.
 
 
 ## Reference
