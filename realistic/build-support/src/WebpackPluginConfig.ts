@@ -7,12 +7,6 @@ export interface WebpackPluginEntryPoint {
    */
   name: string;
   /**
-   * Additional entries to put in the array of entries for this entry point,
-   * useful if you need to set up things like error reporting as separate
-   * entry files into your application.
-   */
-  prefixedEntries?: string[];
-  /**
    * Additional chunks to include in the outputted HTML file. Use this if you
    * set up some custom chunking (e.g. using SplitChunksPlugin).
    */

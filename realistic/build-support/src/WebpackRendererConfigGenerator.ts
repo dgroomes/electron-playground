@@ -125,7 +125,7 @@ export default class WebpackRendererConfigGenerator {
     const plugins: webpack.WebpackPluginInstance[] = [];
 
     for (const entryPoint of entryPointsCast) {
-      entry[entryPoint.name] = (entryPoint.prefixedEntries || []).concat([entryPoint.js]);
+      entry[entryPoint.name] = [entryPoint.js];
 
       plugins.push(
           new HtmlWebpackPlugin({
@@ -157,7 +157,7 @@ export default class WebpackRendererConfigGenerator {
       if (entryPoint.preload === undefined) {
         throw new Error('Expected a preload script to be defined for this entry point but none was found.');
       }
-      entry[entryPoint.name] = (entryPoint.prefixedEntries || []).concat([entryPoint.preload.js]);
+      entry[entryPoint.name] = [entryPoint.preload.js];
     }
     const config: Configuration = {
       target: rendererTargetToWebpackTarget(target),

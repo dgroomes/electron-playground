@@ -180,7 +180,7 @@ General clean-ups, TODOs and things I wish to implement for this project:
       the webpack config object which has some fields with `$` in them which are used in the DefinesPlugin. We don't
       want this, it errors. The Forge code just indiscriminately expands all fields. I think I should be able to hide
       them somehow, make them non-enumerable or whatever.
-    * IN PROGRESS Remove support for multiple preload. Let's just fixate to one for now. I need to get a handle on the code.
+    * DONE Remove support for multiple preload. Let's just fixate to one for now. I need to get a handle on the code.
        * `WebpackPluginEntryPointPreloadOnly` is modelled misleadingly. That type, in practice, actually applies to entry
          points that do indeed have html or js. Similarly, look at the contrasting `isPreloadOnly` and `hasPreloadScript`
          which are type guards for `WebpackPluginEntryPointPreloadOnly`.
@@ -189,6 +189,7 @@ General clean-ups, TODOs and things I wish to implement for this project:
          * DONE Can I get rid of `WebpackPluginEntryPointNoWindow`?
          * DONE Can I get rid of `WebpackPluginEntryPointPreloadOnly`?
          * DONE `WebpackPluginEntryPointLocalWindow` and `WebpackPluginEntryPointBase` should go away and only leave `WebpackPluginEntryPoint`
+     * DONE Remove prefixed entries. Not sure what this is exactly, but I'm not using it. 
      * Keep reducing.
     * What is ExternalsPlugin (used in the preload entrypoint)?
 * [ ] Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.
