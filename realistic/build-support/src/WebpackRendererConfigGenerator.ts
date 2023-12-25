@@ -4,25 +4,16 @@ import webpack, {Configuration, WebpackPluginInstance} from 'webpack';
 import {merge as webpackMerge} from 'webpack-merge';
 import {EnvStrategy} from './EnvStrategy';
 
-import {
-  MAIN_WINDOW,
-  WebpackPluginConfig,
-  WebpackPluginEntryPoint,
-  WebpackPreloadEntryPoint,
-} from './WebpackPluginConfig';
+import {MAIN_WINDOW, WebpackPluginEntryPoint, WebpackPreloadEntryPoint,} from './WebpackPluginConfig';
 
 export default class WebpackRendererConfigGenerator {
 
-  private pluginConfig: WebpackPluginConfig;
+  private configGenerator: () => Configuration;
   private readonly webpackDir: string;
   private envStrategy: EnvStrategy;
 
-  constructor(pluginConfig: WebpackPluginConfig, projectDir: string, envStrategy: EnvStrategy) {
-    if (!pluginConfig.renderer.entryPoint) {
-      throw new Error('Required config option "renderer.entryPoint" has not been defined');
-    }
-
-    this.pluginConfig = pluginConfig;
+  constructor(configGenerator: () => Configuration, projectDir: string, envStrategy: EnvStrategy) {
+    this.configGenerator = configGenerator;
     this.webpackDir = path.resolve(projectDir, '.webpack');
     this.envStrategy = envStrategy;
   }
@@ -34,10 +25,10 @@ export default class WebpackRendererConfigGenerator {
   generateConfig(entryPoint: WebpackPluginEntryPoint): Configuration[] {
     const configs: Configuration[] = [];
 
-    configs.push(this.buildRendererConfigForWebOrRendererTarget(entryPoint));
+    configs.push(this.buildConfig(entryPoint));
 
     if ('preload' in entryPoint) {
-      configs.push(this.buildRendererConfigForPreloadOrSandboxedPreloadTarget(entryPoint.preload));
+      configs.push(this.buildPreloadConfig(entryPoint.preload));
     }
 
     return configs;
@@ -62,11 +53,11 @@ export default class WebpackRendererConfigGenerator {
     };
   }
 
-  private buildRendererConfigForWebOrRendererTarget(
+  private buildConfig(
     entryPoint: WebpackPluginEntryPoint
   ): Configuration | null {
     const baseConfig: webpack.Configuration = this.buildRendererBaseConfig();
-    const rendererConfig = this.pluginConfig.renderer.config;
+    const userConfig = this.configGenerator();
 
     const output = {
       path: path.resolve(this.webpackDir, 'renderer'),
@@ -90,13 +81,13 @@ export default class WebpackRendererConfigGenerator {
       plugins
     };
 
-    return webpackMerge(baseConfig, rendererConfig() || {}, config);
+    return webpackMerge(baseConfig, userConfig || {}, config);
   }
 
-  private buildRendererConfigForPreloadOrSandboxedPreloadTarget(preload: WebpackPreloadEntryPoint) {
+  private buildPreloadConfig(preload: WebpackPreloadEntryPoint) {
     const externals = ['electron', 'electron/renderer', 'electron/common', 'events', 'timers', 'url'];
     const baseConfig: webpack.Configuration = this.buildRendererBaseConfig();
-    const rendererConfig = this.pluginConfig.renderer.config();
+    const userConfig = this.configGenerator();
 
     const config: Configuration = {
       target: 'web',
@@ -109,6 +100,6 @@ export default class WebpackRendererConfigGenerator {
       },
       plugins: [new webpack.ExternalsPlugin('commonjs2', externals)],
     };
-    return webpackMerge(baseConfig, rendererConfig || {}, config);
+    return webpackMerge(baseConfig, userConfig || {}, config);
   }
 }

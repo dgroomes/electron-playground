@@ -68,10 +68,10 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
     init(_dir: string, _config: ResolvedForgeConfig) {
         this.#rootDir = _dir;
         this.#webpackOutputDir = path.resolve(this.#rootDir, '.webpack');
-        const devMainConfigGenerator = new WebpackMainConfigGenerator(this.config.mainConfig(), this.#rootDir, this.#devStrategy, this.config.renderer, this.#port);
-        const devRendererConfigGenerator = new WebpackRendererConfigGenerator(this.config, this.#rootDir, this.#devStrategy);
-        const prodMainConfigGenerator = new WebpackMainConfigGenerator(this.config.mainConfig(), this.#rootDir, this.#prodStrategy, this.config.renderer, this.#port);
-        const prodRendererConfigGenerator = new WebpackRendererConfigGenerator(this.config, this.#rootDir, this.#prodStrategy);
+        const devMainConfigGenerator = new WebpackMainConfigGenerator(this.config.mainConfig(), this.#rootDir, this.#devStrategy, this.#port);
+        const devRendererConfigGenerator = new WebpackRendererConfigGenerator(this.config.renderer.config, this.#rootDir, this.#devStrategy);
+        const prodMainConfigGenerator = new WebpackMainConfigGenerator(this.config.mainConfig(), this.#rootDir, this.#prodStrategy, this.#port);
+        const prodRendererConfigGenerator = new WebpackRendererConfigGenerator(this.config.renderer.config, this.#rootDir, this.#prodStrategy);
 
         this.#devMainConfig = devMainConfigGenerator.generateConfig();
         this.#devRendererConfig = devRendererConfigGenerator.generateConfig(this.config.renderer.entryPoint);
