@@ -74,9 +74,9 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
         const prodRendererConfigGenerator = new WebpackRendererConfigGenerator(this.config, this.#rootDir, this.#prodStrategy);
 
         this.#devMainConfig = devMainConfigGenerator.generateConfig();
-        this.#devRendererConfig = devRendererConfigGenerator.generateConfig(this.config.renderer.entryPoints);
+        this.#devRendererConfig = devRendererConfigGenerator.generateConfig(this.config.renderer.entryPoint);
         this.#prodMainConfig = prodMainConfigGenerator.generateConfig()
-        this.#prodRendererConfig = prodRendererConfigGenerator.generateConfig(this.config.renderer.entryPoints);
+        this.#prodRendererConfig = prodRendererConfigGenerator.generateConfig(this.config.renderer.entryPoint);
 
         super.init(this.#rootDir, _config);
     }

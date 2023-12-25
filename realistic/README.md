@@ -190,8 +190,11 @@ General clean-ups, TODOs and things I wish to implement for this project:
          * DONE Can I get rid of `WebpackPluginEntryPointPreloadOnly`?
          * DONE `WebpackPluginEntryPointLocalWindow` and `WebpackPluginEntryPointBase` should go away and only leave `WebpackPluginEntryPoint`
      * DONE Remove prefixed entries. Not sure what this is exactly, but I'm not using it. 
-     * IN PROGRESS Remove Node integration flag. Not used.
+     * DONE Remove Node integration flag. Not used.
        * Follow the knock-on collapse.
+     * DONE Do we need multiple entrypoints?
+     * Visit `buildRendererBaseConfig` and `rendererTargetToWebpackTarget`. They needlessly accept `RendererTarget.SandboxedPreload`
+       as their only argument. Also visit `buildRendererConfigForWebOrRendererTarget`, similar thing.
      * Keep reducing.
     * What is ExternalsPlugin (used in the preload entrypoint)?
 * [ ] Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.

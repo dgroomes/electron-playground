@@ -47,11 +47,7 @@ export interface WebpackPluginRendererConfig {
    * actually packaged with your app.
    */
   jsonStats?: boolean;
-  /**
-   * Array of entry points, these should map to the windows your app needs to
-   * open.  Each window requires its own entry point
-   */
-  entryPoints: WebpackPluginEntryPoint[];
+  entryPoint: WebpackPluginEntryPoint;
 }
 
 export interface WebpackPluginConfig {

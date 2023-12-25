@@ -24,7 +24,7 @@ function htmlEntrypoint(): string {
     }
 }
 
-function staticMainConfig() : Configuration {
+function staticMainConfig(): Configuration {
     return {
         devtool: 'source-map',
         target: 'electron-main',
@@ -53,7 +53,7 @@ function staticMainConfig() : Configuration {
     };
 }
 
-function staticRendererConfig() : Configuration {
+function staticRendererConfig(): Configuration {
     return {
         plugins: [],
         stats: {
@@ -128,17 +128,16 @@ const webpackPluginConfig: WebpackPluginConfig = {
         // Entrypoints are an Electron Forge concept, but they closely resemble webpack 'Entry' objects.
         // You might have multiple entrypoints if say you're product has a "new UI" and an "old UI". Or maybe
         // you just have a multipage application with pages like "/home", "/about", "/contact", and you handle
-        // page transitions from the electron main process.
-        entryPoints: [
-            {
-                name: "main_window",
-                html: htmlEntrypoint(),
-                js: "./src/renderer.tsx",
-                preload: {
-                    js: "./src/preload.ts",
-                },
+        // page transitions from the electron main process. For now, I'm only supporting one entrypoint until I can
+        // wrangle the build complexity.
+        entryPoint: {
+            name: "main_window",
+            html: htmlEntrypoint(),
+            js: "./src/renderer.tsx",
+            preload: {
+                js: "./src/preload.ts",
             },
-        ],
+        }
     },
 };
 
