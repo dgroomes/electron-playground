@@ -6,7 +6,6 @@ import {
   WebpackPluginEntryPoint,
   WebpackPluginRendererConfig
 } from './WebpackPluginConfig';
-import {isLocalWindow} from './rendererTypeUtils';
 
 // noinspection JSUnusedGlobalSymbols
 export default class WebpackMainConfigGenerator {

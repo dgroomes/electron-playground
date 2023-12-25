@@ -1,7 +1,7 @@
 import {Configuration} from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 
-export interface WebpackPluginEntryPointBase {
+export interface WebpackPluginEntryPoint {
   /**
    * Human friendly name of your entry point
    */
@@ -31,9 +31,7 @@ export interface WebpackPluginEntryPointBase {
    * for all entries.
    */
   nodeIntegration?: boolean;
-}
 
-export interface WebpackPluginEntryPointLocalWindow extends WebpackPluginEntryPointBase {
   /**
    * Relative or absolute path to the HTML template file for this entry point.
    */
@@ -48,8 +46,6 @@ export interface WebpackPluginEntryPointLocalWindow extends WebpackPluginEntryPo
    */
   preload?: WebpackPreloadEntryPoint;
 }
-
-export type WebpackPluginEntryPoint = WebpackPluginEntryPointLocalWindow;
 
 export interface WebpackPreloadEntryPoint {
   /**

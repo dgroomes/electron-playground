@@ -7,11 +7,9 @@ import {EnvStrategy} from './EnvStrategy';
 import {
   WebpackPluginConfig,
   WebpackPluginEntryPoint,
-  WebpackPluginEntryPointLocalWindow
 } from './WebpackPluginConfig';
 import {
   hasPreloadScript,
-  isLocalWindow,
 } from './rendererTypeUtils';
 
 enum RendererTarget {
@@ -57,8 +55,8 @@ export default class WebpackRendererConfigGenerator {
 
   generateConfig(entryPoints: WebpackPluginEntryPoint[]): Configuration[] {
     const entryPointsForTarget = {
-      web: [] as (WebpackPluginEntryPointLocalWindow | WebpackPluginEntryPoint)[],
-      electronRenderer: [] as (WebpackPluginEntryPointLocalWindow | WebpackPluginEntryPoint)[],
+      web: [] as WebpackPluginEntryPoint[],
+      electronRenderer: [] as WebpackPluginEntryPoint[],
       electronPreload: [] as WebpackPluginEntryPoint[],
       sandboxedPreload: [] as WebpackPluginEntryPoint[],
     };
@@ -67,9 +65,7 @@ export default class WebpackRendererConfigGenerator {
       const target = entry.nodeIntegration ?? this.pluginConfig.renderer.nodeIntegration ? 'electronRenderer' : 'web';
       const preloadTarget = entry.nodeIntegration ?? this.pluginConfig.renderer.nodeIntegration ? 'electronPreload' : 'sandboxedPreload';
 
-      if (isLocalWindow(entry)) {
-        entryPointsForTarget[target].push(entry);
-      }
+      entryPointsForTarget[target].push(entry);
 
       if (hasPreloadScript(entry)) {
         entryPointsForTarget[preloadTarget].push(entry);
@@ -114,7 +110,7 @@ export default class WebpackRendererConfigGenerator {
   ): Configuration | null {
 
     // This cast is a short term workaround as we eventually thin out the types.
-    const entryPointsCast = entryPoints as (WebpackPluginEntryPointLocalWindow)[];
+    const entryPointsCast = entryPoints as WebpackPluginEntryPoint[];
 
     const entry: webpack.Entry = {};
     const baseConfig: webpack.Configuration = this.buildRendererBaseConfig(target);
@@ -131,16 +127,14 @@ export default class WebpackRendererConfigGenerator {
     for (const entryPoint of entryPointsCast) {
       entry[entryPoint.name] = (entryPoint.prefixedEntries || []).concat([entryPoint.js]);
 
-      if (isLocalWindow(entryPoint)) {
-        plugins.push(
+      plugins.push(
           new HtmlWebpackPlugin({
             title: entryPoint.name,
             template: entryPoint.html,
             filename: `${entryPoint.name}/index.html`,
             chunks: [entryPoint.name].concat(entryPoint.additionalChunks || []),
           }) as WebpackPluginInstance
-        );
-      }
+      );
     }
     return webpackMerge(baseConfig, rendererConfig() || {}, { entry, output, plugins });
   }
