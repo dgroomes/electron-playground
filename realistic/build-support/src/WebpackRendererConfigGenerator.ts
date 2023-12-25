@@ -1,7 +1,6 @@
 import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-import webpack, {Configuration, WebpackPluginInstance} from 'webpack';
-import {merge as webpackMerge} from 'webpack-merge';
+import webpack, {Configuration} from 'webpack';
 import {EnvStrategy} from './EnvStrategy';
 
 import {MAIN_WINDOW, WebpackPluginEntryPoint, WebpackPreloadEntryPoint,} from './WebpackPluginConfig';
@@ -34,72 +33,58 @@ export default class WebpackRendererConfigGenerator {
     return configs;
   }
 
-  private buildRendererBaseConfig(): webpack.Configuration {
-    return {
-      target: 'web',
-      devtool: this.envStrategy.devtool(),
-      mode: this.envStrategy.mode(),
-      output: {
-        path: path.resolve(this.webpackDir, 'renderer'),
-        filename: '[name]/index.js',
-        globalObject: 'self',
-        publicPath: this.envStrategy.publicPath(),
-      },
-      node: {
-        __dirname: false,
-        __filename: false,
-      },
-      plugins: [],
+  /**
+   * Enrich the supplied config with common properties. This side effects the given configuration object.
+   */
+  private enrichWithCommonConfig(config: webpack.Configuration) {
+    config.target = 'web';
+    // Let's use 'source-map' instead of the default behavior which uses 'eval'. When 'eval' is used, then we need to
+    // relax the Content-Security-Policy rule to allow 'unsafe-eval'. This is not a great trade-off in my case, because
+    // I don't need the extra build speed of the default behavior, and I'd prefer to appease the security preferences of
+    // the browser, which logs an annoying warning to the console when 'unsafe-eval' is used.
+    config.devtool = "source-map";
+    config.mode = this.envStrategy.mode();
+    config.output = {
+      path: path.resolve(this.webpackDir, 'renderer'),
+      filename: '[name]/index.js',
+      globalObject: 'self',
+      publicPath: this.envStrategy.publicPath(),
+    };
+    config.node = {
+      __dirname: false,
+      __filename: false,
     };
   }
 
   private buildConfig(
     entryPoint: WebpackPluginEntryPoint
   ): Configuration | null {
-    const baseConfig: webpack.Configuration = this.buildRendererBaseConfig();
-    const userConfig = this.configGenerator();
+    const returnConfig: webpack.Configuration = this.configGenerator();
+    this.enrichWithCommonConfig(returnConfig);
 
-    const output = {
-      path: path.resolve(this.webpackDir, 'renderer'),
-      filename: '[name]/index.js',
-      globalObject: 'self',
-      publicPath: this.envStrategy.publicPath(),
-    };
-    const plugins: webpack.WebpackPluginInstance[] = [];
+    returnConfig.entry = { [MAIN_WINDOW]: entryPoint.js };
+    returnConfig.output.filename = '[name]/index.js';
+    returnConfig.plugins = [
+      new HtmlWebpackPlugin({
+        title: MAIN_WINDOW,
+        template: entryPoint.html,
+        filename: `${MAIN_WINDOW}/index.html`,
+        chunks: [MAIN_WINDOW],
+      })
+    ];
 
-    plugins.push(
-        new HtmlWebpackPlugin({
-          title: MAIN_WINDOW,
-          template: entryPoint.html,
-          filename: `${MAIN_WINDOW}/index.html`,
-          chunks: [MAIN_WINDOW],
-        }) as WebpackPluginInstance
-    );
-    const config : Configuration = {
-      entry: { [MAIN_WINDOW]: entryPoint.js },
-      output,
-      plugins
-    };
-
-    return webpackMerge(baseConfig, userConfig || {}, config);
+    return returnConfig;
   }
 
   private buildPreloadConfig(preload: WebpackPreloadEntryPoint) {
     const externals = ['electron', 'electron/renderer', 'electron/common', 'events', 'timers', 'url'];
-    const baseConfig: webpack.Configuration = this.buildRendererBaseConfig();
-    const userConfig = this.configGenerator();
+    const returnConfig = this.configGenerator();
+    this.enrichWithCommonConfig(returnConfig);
 
-    const config: Configuration = {
-      target: 'web',
-      entry: { [MAIN_WINDOW]: preload.js },
-      output: {
-        path: path.resolve(this.webpackDir, 'renderer'),
-        filename: '[name]/preload.js',
-        globalObject: 'self',
-        publicPath: this.envStrategy.publicPath(),
-      },
-      plugins: [new webpack.ExternalsPlugin('commonjs2', externals)],
-    };
-    return webpackMerge(baseConfig, userConfig || {}, config);
+    returnConfig.entry = { [MAIN_WINDOW]: preload.js };
+    returnConfig.output.filename = '[name]/preload.js';
+    returnConfig.plugins = [new webpack.ExternalsPlugin('commonjs2', externals)];
+
+    return returnConfig
   }
 }

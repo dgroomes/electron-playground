@@ -7,7 +7,6 @@ import path from "path";
  */
 export interface EnvStrategy {
     mode(): Configuration["mode"];
-    devtool(): Configuration["devtool"];
     publicPath(): Configuration["output"]["publicPath"];
     preloadDefine(webpackOutputDir: string, entryPointName: string): string;
     rendererEntryPoint(entryPointName: string, basename: string, port: number): string;
@@ -16,10 +15,6 @@ export interface EnvStrategy {
 export class ProductionEnvStrategy implements EnvStrategy {
     mode(): Configuration["mode"] {
         return "production";
-    }
-
-    devtool(): Configuration["devtool"] {
-        return "source-map";
     }
 
     publicPath(): Configuration["output"]["publicPath"] {
@@ -39,10 +34,6 @@ export class ProductionEnvStrategy implements EnvStrategy {
 export class DevelopmentEnvStrategy implements EnvStrategy {
     mode(): Configuration["mode"] {
         return "development";
-    }
-
-    devtool(): Configuration["devtool"] {
-        return "eval-source-map";
     }
 
     publicPath(): Configuration["output"]["publicPath"] {

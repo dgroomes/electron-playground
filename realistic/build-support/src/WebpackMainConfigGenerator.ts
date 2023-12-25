@@ -31,6 +31,9 @@ export default class WebpackMainConfigGenerator {
     mainConfig.output.path = path.resolve(this.#webpackOutputDir, 'main');
     mainConfig.mode =  this.#envStrategy.mode()
     mainConfig.plugins = [new DefinePlugin(this.getDefines(this.#envStrategy))];
+    // Not sure if this is really needed. We are using 'source-map' in the renderer but not sure what we want in the main
+    // process.
+    mainConfig.devtool = 'eval-source-map';
     return mainConfig;
   }
 

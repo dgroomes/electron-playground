@@ -21,7 +21,6 @@ const versions = {
     electronForge: "^6.4.2", // Electron Forge releases: https://github.com/electron/forge/releases
     tsLoader: "^9.5.0", // ts-loader releases: https://github.com/TypeStrong/ts-loader/releases
     webpackDevServer: "^4.15.1", // webpack-dev-server releases: https://github.com/webpack/webpack-dev-server/releases/tag/v4.15.1
-    webpackMerge: "^5.10.0", // webpack-merge releases: https://github.com/survivejs/webpack-merge/blob/develop/CHANGELOG.md
     htmlWebpackPlugin: "^5.5.3", // html-webpack-plugin releases: https://github.com/jantimon/html-webpack-plugin/blob/main/CHANGELOG.md
     react: "^18.2.0", // React releases: https://legacy.reactjs.org/versions
     reactTypes: "^18.2.37", // @types/react releases: https://www.npmjs.com/package/@types/react
@@ -136,7 +135,6 @@ generatePackageJson("build-support", false, {
         "@electron-forge/cli": versions.electronForge,
         "@electron-forge/maker-zip": versions.electronForge,
         "webpack-dev-server": versions.webpackDevServer,
-        "webpack-merge": versions.webpackMerge,
         "html-webpack-plugin": versions.htmlWebpackPlugin,
         "ts-loader": versions.tsLoader,
         "css-loader": versions.cssLoader,
