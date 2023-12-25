@@ -5,7 +5,6 @@ import {merge as webpackMerge} from 'webpack-merge';
 import {EnvStrategy} from './EnvStrategy';
 
 import {WebpackPluginConfig, WebpackPluginEntryPoint,} from './WebpackPluginConfig';
-import {hasPreloadScript,} from './rendererTypeUtils';
 
 enum RendererTarget {
   Web,
@@ -40,24 +39,26 @@ export default class WebpackRendererConfigGenerator {
     this.envStrategy = envStrategy;
   }
 
+  /**
+   * TODO do we need to support multiple entrypoints?
+   * @param entryPoints
+   */
   generateConfig(entryPoints: WebpackPluginEntryPoint[]): Configuration[] {
-    const entryPointsForTarget = {
-      web: [] as WebpackPluginEntryPoint[],
-      sandboxedPreload: [] as WebpackPluginEntryPoint[],
-    };
+    const web = [] as WebpackPluginEntryPoint[];
+    const sandboxedPreload = [] as WebpackPluginEntryPoint[];
 
     for (const entry of entryPoints) {
-      entryPointsForTarget['web'].push(entry);
+      web.push(entry);
 
-      if (hasPreloadScript(entry)) {
-        entryPointsForTarget['sandboxedPreload'].push(entry);
+      if ('preload' in entry) {
+        sandboxedPreload.push(entry);
       }
     }
 
     const rendererConfigs =
       [
-        this.buildRendererConfig(entryPointsForTarget.web, RendererTarget.Web),
-        this.buildRendererConfig(entryPointsForTarget.sandboxedPreload, RendererTarget.SandboxedPreload),
+        this.buildRendererConfig(web, RendererTarget.Web),
+        this.buildRendererConfig(sandboxedPreload, RendererTarget.SandboxedPreload),
       ].filter(config => config !== null);
 
     return rendererConfigs.filter(function <T>(item: T | null): item is T {
