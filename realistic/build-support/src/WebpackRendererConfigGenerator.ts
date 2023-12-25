@@ -6,23 +6,6 @@ import {EnvStrategy} from './EnvStrategy';
 
 import {WebpackPluginConfig, WebpackPluginEntryPoint,} from './WebpackPluginConfig';
 
-enum RendererTarget {
-  Web,
-  SandboxedPreload,
-}
-
-enum WebpackTarget {
-  Web = 'web',
-}
-
-function rendererTargetToWebpackTarget(target: RendererTarget): WebpackTarget {
-  switch (target) {
-    case RendererTarget.Web:
-    case RendererTarget.SandboxedPreload:
-      return WebpackTarget.Web;
-  }
-}
-
 export default class WebpackRendererConfigGenerator {
 
   private pluginConfig: WebpackPluginConfig;
@@ -46,18 +29,18 @@ export default class WebpackRendererConfigGenerator {
   generateConfig(entryPoint: WebpackPluginEntryPoint): Configuration[] {
     const configs: Configuration[] = [];
 
-    configs.push(this.buildRendererConfig(entryPoint, RendererTarget.Web));
+    configs.push(this.buildRendererConfigForWebOrRendererTarget(entryPoint));
 
     if ('preload' in entryPoint) {
-      configs.push(this.buildRendererConfig(entryPoint, RendererTarget.SandboxedPreload));
+      configs.push(this.buildRendererConfigForPreloadOrSandboxedPreloadTarget(entryPoint));
     }
 
     return configs;
   }
 
-  private buildRendererBaseConfig(target: RendererTarget): webpack.Configuration {
+  private buildRendererBaseConfig(): webpack.Configuration {
     return {
-      target: rendererTargetToWebpackTarget(target),
+      target: 'web',
       devtool: this.envStrategy.devtool(),
       mode: this.envStrategy.mode(),
       output: {
@@ -75,11 +58,10 @@ export default class WebpackRendererConfigGenerator {
   }
 
   private buildRendererConfigForWebOrRendererTarget(
-    entryPoint: WebpackPluginEntryPoint,
-    target: RendererTarget.Web
+    entryPoint: WebpackPluginEntryPoint
   ): Configuration | null {
     const entry: webpack.Entry = {};
-    const baseConfig: webpack.Configuration = this.buildRendererBaseConfig(target);
+    const baseConfig: webpack.Configuration = this.buildRendererBaseConfig();
     const rendererConfig = this.pluginConfig.renderer.config;
 
     const output = {
@@ -109,7 +91,7 @@ export default class WebpackRendererConfigGenerator {
     const externals = ['electron', 'electron/renderer', 'electron/common', 'events', 'timers', 'url'];
 
     const entry: webpack.Entry = {};
-    const baseConfig: webpack.Configuration = this.buildRendererBaseConfig(RendererTarget.SandboxedPreload);
+    const baseConfig: webpack.Configuration = this.buildRendererBaseConfig();
     const rendererConfig = this.pluginConfig.renderer.config();
 
     if (entryPoint.preload === undefined) {
@@ -117,7 +99,7 @@ export default class WebpackRendererConfigGenerator {
     }
     entry[entryPoint.name] = [entryPoint.preload.js];
     const config: Configuration = {
-      target: rendererTargetToWebpackTarget(RendererTarget.SandboxedPreload),
+      target: 'web',
       entry,
       output: {
         path: path.resolve(this.webpackDir, 'renderer'),
@@ -128,15 +110,5 @@ export default class WebpackRendererConfigGenerator {
       plugins: [new webpack.ExternalsPlugin('commonjs2', externals)],
     };
     return webpackMerge(baseConfig, rendererConfig || {}, config);
-  }
-
-  private buildRendererConfig(entryPoint: WebpackPluginEntryPoint, target: RendererTarget): webpack.Configuration {
-    if (target === RendererTarget.Web) {
-      return this.buildRendererConfigForWebOrRendererTarget(entryPoint, target);
-    } else if (target === RendererTarget.SandboxedPreload) {
-      return this.buildRendererConfigForPreloadOrSandboxedPreloadTarget(entryPoint);
-    } else {
-      throw new Error('Invalid renderer entry point detected.');
-    }
   }
 }
