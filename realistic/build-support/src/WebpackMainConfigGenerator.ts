@@ -3,6 +3,7 @@ import {Configuration, DefinePlugin} from 'webpack';
 import {EnvStrategy} from './EnvStrategy';
 
 import {
+  MAIN_WINDOW,
   WebpackPluginEntryPoint,
   WebpackPluginRendererConfig
 } from './WebpackPluginConfig';
@@ -30,7 +31,7 @@ export default class WebpackMainConfigGenerator {
    * This was ported from the WebpackConfigGenerator. It's a bit awkward right now.
    * @private
    */
-  public generateConfig() {
+  public generateConfig() : Configuration {
     const mainConfig = this.config;
     mainConfig.entry = path.resolve(this.projectDir, "./src/main.ts");
     mainConfig.output.path = path.resolve(this.webpackOutputDir, 'main');
@@ -46,11 +47,11 @@ export default class WebpackMainConfigGenerator {
     const defines: Record<string, string> = {};
     const entryPoint = this.pluginRendererConfig.entryPoint;
     const entryKey = this.toEnvironmentVariable(entryPoint);
-    defines[entryKey] = envStrategy.rendererEntryPoint(entryPoint.name, 'index.html', this.port);
+    defines[entryKey] = envStrategy.rendererEntryPoint(MAIN_WINDOW, 'index.html', this.port);
     defines[`process.env.${entryKey}`] = defines[entryKey];
 
     const preloadDefineKey = this.toEnvironmentVariable(entryPoint, true);
-    defines[preloadDefineKey] = envStrategy.preloadDefine(this.webpackOutputDir, entryPoint.name);
+    defines[preloadDefineKey] = envStrategy.preloadDefine(this.webpackOutputDir, MAIN_WINDOW);
     defines[`process.env.${preloadDefineKey}`] = defines[preloadDefineKey];
 
     return defines;
@@ -58,6 +59,6 @@ export default class WebpackMainConfigGenerator {
 
   private toEnvironmentVariable(entryPoint: WebpackPluginEntryPoint, preload = false): string {
     const suffix = preload ? '_PRELOAD_WEBPACK_ENTRY' : '_WEBPACK_ENTRY';
-    return `${entryPoint.name.toUpperCase().replace(/ /g, '_')}${suffix}`;
+    return `${MAIN_WINDOW.toUpperCase().replace(/ /g, '_')}${suffix}`;
   }
 }

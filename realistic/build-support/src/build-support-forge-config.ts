@@ -131,7 +131,6 @@ const webpackPluginConfig: WebpackPluginConfig = {
         // page transitions from the electron main process. For now, I'm only supporting one entrypoint until I can
         // wrangle the build complexity.
         entryPoint: {
-            name: "main_window",
             html: htmlEntrypoint(),
             js: "./src/renderer.tsx",
             preload: {

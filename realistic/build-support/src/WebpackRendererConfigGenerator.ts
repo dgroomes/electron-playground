@@ -4,7 +4,12 @@ import webpack, {Configuration, WebpackPluginInstance} from 'webpack';
 import {merge as webpackMerge} from 'webpack-merge';
 import {EnvStrategy} from './EnvStrategy';
 
-import {WebpackPluginConfig, WebpackPluginEntryPoint,} from './WebpackPluginConfig';
+import {
+  MAIN_WINDOW,
+  WebpackPluginConfig,
+  WebpackPluginEntryPoint,
+  WebpackPreloadEntryPoint,
+} from './WebpackPluginConfig';
 
 export default class WebpackRendererConfigGenerator {
 
@@ -32,7 +37,7 @@ export default class WebpackRendererConfigGenerator {
     configs.push(this.buildRendererConfigForWebOrRendererTarget(entryPoint));
 
     if ('preload' in entryPoint) {
-      configs.push(this.buildRendererConfigForPreloadOrSandboxedPreloadTarget(entryPoint));
+      configs.push(this.buildRendererConfigForPreloadOrSandboxedPreloadTarget(entryPoint.preload));
     }
 
     return configs;
@@ -60,7 +65,6 @@ export default class WebpackRendererConfigGenerator {
   private buildRendererConfigForWebOrRendererTarget(
     entryPoint: WebpackPluginEntryPoint
   ): Configuration | null {
-    const entry: webpack.Entry = {};
     const baseConfig: webpack.Configuration = this.buildRendererBaseConfig();
     const rendererConfig = this.pluginConfig.renderer.config;
 
@@ -72,35 +76,31 @@ export default class WebpackRendererConfigGenerator {
     };
     const plugins: webpack.WebpackPluginInstance[] = [];
 
-    entry[entryPoint.name] = [entryPoint.js];
-
     plugins.push(
         new HtmlWebpackPlugin({
-          title: entryPoint.name,
+          title: MAIN_WINDOW,
           template: entryPoint.html,
-          filename: `${entryPoint.name}/index.html`,
-          chunks: [entryPoint.name],
+          filename: `${MAIN_WINDOW}/index.html`,
+          chunks: [MAIN_WINDOW],
         }) as WebpackPluginInstance
     );
-    return webpackMerge(baseConfig, rendererConfig() || {}, { entry, output, plugins });
+    const config : Configuration = {
+      entry: { [MAIN_WINDOW]: entryPoint.js },
+      output,
+      plugins
+    };
+
+    return webpackMerge(baseConfig, rendererConfig() || {}, config);
   }
 
-  private buildRendererConfigForPreloadOrSandboxedPreloadTarget(
-    entryPoint: WebpackPluginEntryPoint
-  ): Configuration {
+  private buildRendererConfigForPreloadOrSandboxedPreloadTarget(preload: WebpackPreloadEntryPoint) {
     const externals = ['electron', 'electron/renderer', 'electron/common', 'events', 'timers', 'url'];
-
-    const entry: webpack.Entry = {};
     const baseConfig: webpack.Configuration = this.buildRendererBaseConfig();
     const rendererConfig = this.pluginConfig.renderer.config();
 
-    if (entryPoint.preload === undefined) {
-      throw new Error('Expected a preload script to be defined for this entry point but none was found.');
-    }
-    entry[entryPoint.name] = [entryPoint.preload.js];
     const config: Configuration = {
       target: 'web',
-      entry,
+      entry: { [MAIN_WINDOW]: preload.js },
       output: {
         path: path.resolve(this.webpackDir, 'renderer'),
         filename: '[name]/preload.js',

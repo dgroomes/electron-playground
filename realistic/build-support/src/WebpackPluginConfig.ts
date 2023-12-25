@@ -3,11 +3,6 @@ import WebpackDevServer from 'webpack-dev-server';
 
 export interface WebpackPluginEntryPoint {
   /**
-   * Human friendly name of your entry point
-   */
-  name: string;
-
-  /**
    * Relative or absolute path to the HTML template file for this entry point.
    */
   html: string;
@@ -104,3 +99,5 @@ export interface WebpackPluginConfig {
    */
   devServer?: Omit<WebpackDevServer.Configuration, 'port' | 'static' | 'setupExitSignals' | 'Content-Security-Policy'>;
 }
+
+export const MAIN_WINDOW = "main_window";
