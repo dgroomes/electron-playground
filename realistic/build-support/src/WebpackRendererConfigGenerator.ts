@@ -4,13 +4,8 @@ import webpack, {Configuration, WebpackPluginInstance} from 'webpack';
 import {merge as webpackMerge} from 'webpack-merge';
 import {EnvStrategy} from './EnvStrategy';
 
-import {
-  WebpackPluginConfig,
-  WebpackPluginEntryPoint,
-} from './WebpackPluginConfig';
-import {
-  hasPreloadScript,
-} from './rendererTypeUtils';
+import {WebpackPluginConfig, WebpackPluginEntryPoint,} from './WebpackPluginConfig';
+import {hasPreloadScript,} from './rendererTypeUtils';
 
 enum RendererTarget {
   Web,
@@ -62,13 +57,10 @@ export default class WebpackRendererConfigGenerator {
     };
 
     for (const entry of entryPoints) {
-      const target = entry.nodeIntegration ?? this.pluginConfig.renderer.nodeIntegration ? 'electronRenderer' : 'web';
-      const preloadTarget = entry.nodeIntegration ?? this.pluginConfig.renderer.nodeIntegration ? 'electronPreload' : 'sandboxedPreload';
-
-      entryPointsForTarget[target].push(entry);
+      entryPointsForTarget['web'].push(entry);
 
       if (hasPreloadScript(entry)) {
-        entryPointsForTarget[preloadTarget].push(entry);
+        entryPointsForTarget['sandboxedPreload'].push(entry);
       }
     }
 

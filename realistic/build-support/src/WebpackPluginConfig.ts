@@ -6,20 +6,6 @@ export interface WebpackPluginEntryPoint {
    * Human friendly name of your entry point
    */
   name: string;
-  /**
-   * Override the webpack config for this renderer based on whether `nodeIntegration` for
-   * the `BrowserWindow` is enabled. For webpack's `target` option:
-   *
-   * * When `nodeIntegration` is true, the `target` is `electron-renderer`.
-   * * When `nodeIntegration` is false, the `target` is `web`.
-   *
-   * Unfortunately, we cannot derive the value from the main process code as it can be
-   * dynamically generated at run-time, and webpack processes at build-time.
-   *
-   * Defaults to `false` (as it is disabled by default in Electron \>= 5) or the value set
-   * for all entries.
-   */
-  nodeIntegration?: boolean;
 
   /**
    * Relative or absolute path to the HTML template file for this entry point.
@@ -61,19 +47,6 @@ export interface WebpackPluginRendererConfig {
    * actually packaged with your app.
    */
   jsonStats?: boolean;
-  /**
-   * Override the webpack config for this renderer based on whether `nodeIntegration` for
-   * the `BrowserWindow` is enabled. For webpack's `target` option:
-   *
-   * * When `nodeIntegration` is true, the `target` is `electron-renderer`.
-   * * When `nodeIntegration` is false, the `target` is `web`.
-   *
-   * Unfortunately, we cannot derive the value from the main process code as it can be
-   * dynamically generated at run-time, and webpack processes at build-time.
-   *
-   * Defaults to `false` (as it is disabled by default in Electron \>= 5).
-   */
-  nodeIntegration?: boolean;
   /**
    * Array of entry points, these should map to the windows your app needs to
    * open.  Each window requires its own entry point
