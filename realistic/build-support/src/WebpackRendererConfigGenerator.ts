@@ -132,7 +132,7 @@ export default class WebpackRendererConfigGenerator {
             title: entryPoint.name,
             template: entryPoint.html,
             filename: `${entryPoint.name}/index.html`,
-            chunks: [entryPoint.name].concat(entryPoint.additionalChunks || []),
+            chunks: [entryPoint.name],
           }) as WebpackPluginInstance
       );
     }

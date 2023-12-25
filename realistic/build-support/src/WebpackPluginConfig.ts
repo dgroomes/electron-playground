@@ -7,11 +7,6 @@ export interface WebpackPluginEntryPoint {
    */
   name: string;
   /**
-   * Additional chunks to include in the outputted HTML file. Use this if you
-   * set up some custom chunking (e.g. using SplitChunksPlugin).
-   */
-  additionalChunks?: string[];
-  /**
    * Override the webpack config for this renderer based on whether `nodeIntegration` for
    * the `BrowserWindow` is enabled. For webpack's `target` option:
    *
