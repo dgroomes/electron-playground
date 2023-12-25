@@ -9,15 +9,11 @@ import {hasPreloadScript,} from './rendererTypeUtils';
 
 enum RendererTarget {
   Web,
-  ElectronRenderer,
-  ElectronPreload,
   SandboxedPreload,
 }
 
 enum WebpackTarget {
   Web = 'web',
-  ElectronPreload = 'electron-preload',
-  ElectronRenderer = 'electron-renderer',
 }
 
 function rendererTargetToWebpackTarget(target: RendererTarget): WebpackTarget {
@@ -25,10 +21,6 @@ function rendererTargetToWebpackTarget(target: RendererTarget): WebpackTarget {
     case RendererTarget.Web:
     case RendererTarget.SandboxedPreload:
       return WebpackTarget.Web;
-    case RendererTarget.ElectronPreload:
-      return WebpackTarget.ElectronPreload;
-    case RendererTarget.ElectronRenderer:
-      return WebpackTarget.ElectronRenderer;
   }
 }
 
@@ -51,8 +43,6 @@ export default class WebpackRendererConfigGenerator {
   generateConfig(entryPoints: WebpackPluginEntryPoint[]): Configuration[] {
     const entryPointsForTarget = {
       web: [] as WebpackPluginEntryPoint[],
-      electronRenderer: [] as WebpackPluginEntryPoint[],
-      electronPreload: [] as WebpackPluginEntryPoint[],
       sandboxedPreload: [] as WebpackPluginEntryPoint[],
     };
 
@@ -67,8 +57,6 @@ export default class WebpackRendererConfigGenerator {
     const rendererConfigs =
       [
         this.buildRendererConfig(entryPointsForTarget.web, RendererTarget.Web),
-        this.buildRendererConfig(entryPointsForTarget.electronRenderer, RendererTarget.ElectronRenderer),
-        this.buildRendererConfig(entryPointsForTarget.electronPreload, RendererTarget.ElectronPreload),
         this.buildRendererConfig(entryPointsForTarget.sandboxedPreload, RendererTarget.SandboxedPreload),
       ].filter(config => config !== null);
 
@@ -98,7 +86,7 @@ export default class WebpackRendererConfigGenerator {
 
   private buildRendererConfigForWebOrRendererTarget(
     entryPoints: WebpackPluginEntryPoint[],
-    target: RendererTarget.Web | RendererTarget.ElectronRenderer
+    target: RendererTarget.Web
   ): Configuration | null {
 
     // This cast is a short term workaround as we eventually thin out the types.
@@ -133,7 +121,7 @@ export default class WebpackRendererConfigGenerator {
 
   private buildRendererConfigForPreloadOrSandboxedPreloadTarget(
     entryPoints: WebpackPluginEntryPoint[],
-    target: RendererTarget.ElectronPreload | RendererTarget.SandboxedPreload
+    target: RendererTarget.SandboxedPreload
   ): Configuration | null {
     if (entryPoints.length === 0) {
       return null;
@@ -160,7 +148,7 @@ export default class WebpackRendererConfigGenerator {
         globalObject: 'self',
         publicPath: this.envStrategy.publicPath(),
       },
-      plugins: target === RendererTarget.ElectronPreload ? [] : [new webpack.ExternalsPlugin('commonjs2', externals)],
+      plugins: [new webpack.ExternalsPlugin('commonjs2', externals)],
     };
     return webpackMerge(baseConfig, rendererConfig || {}, config);
   }
@@ -169,9 +157,9 @@ export default class WebpackRendererConfigGenerator {
     if (entryPoints.length === 0) {
       return null;
     }
-    if (target === RendererTarget.Web || target === RendererTarget.ElectronRenderer) {
+    if (target === RendererTarget.Web) {
       return this.buildRendererConfigForWebOrRendererTarget(entryPoints, target);
-    } else if (target === RendererTarget.ElectronPreload || target === RendererTarget.SandboxedPreload) {
+    } else if (target === RendererTarget.SandboxedPreload) {
       return this.buildRendererConfigForPreloadOrSandboxedPreloadTarget(entryPoints, target);
     } else {
       throw new Error('Invalid renderer entry point detected.');
