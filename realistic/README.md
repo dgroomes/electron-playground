@@ -163,7 +163,7 @@ General clean-ups, TODOs and things I wish to implement for this project:
     * DONE Combine config
     * ABANDON (No this is too odd) Consider starting Electron Forge from the Node API instead of the CLI via start script. I'd like to get rid of the
       `forge.config.ts` file if possible. The project plugin is the monolithic entity, including config.
-* [ ] IN PROGRESS Drop the `WebpackConfig.ts` code and use my own webpack config (this is phase 2 of the overall custom plugin)
+* [x] DONE Drop the `WebpackConfig.ts` code and use my own webpack config (this is phase 2 of the overall custom plugin)
     * DONE Remove `@electron-forge/plugin-webpack` and wholesale copy over the needed code. I will gradually
       rewrite it.
     * DONE (it's not even used; maybe it was used for the native rebuilding which is something I also don't want) The AssetRelocatorPatch is a particularly nasty implementation detail. I don't really want to maintain it.
@@ -203,8 +203,7 @@ General clean-ups, TODOs and things I wish to implement for this project:
        smaller now, and also the BuildSupportForgePlugin is now doing too much boilerplate work between the dev/prod and
        render/render-preload/main dimensions. Or, at least consider something.
      * DONE Get rid of WebpackPluginConfig entirely.
-     * Keep reducing.
-    * What is ExternalsPlugin (used in the preload entrypoint)?
+* [ ] What is ExternalsPlugin (used in the preload entrypoint)?
 * [ ] Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.
 * [ ] Go away from the `main_window` name because the overloading on the word main is actually extremely confusing, because
   in Electron the there is the "main process".

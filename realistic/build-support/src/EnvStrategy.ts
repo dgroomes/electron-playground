@@ -1,7 +1,6 @@
 import { Configuration } from "webpack";
 import path from "path";
 
-
 /**
  * Encapsulate environment-specific webpack configuration.
  */
