@@ -30,21 +30,6 @@ export interface WebpackPreloadEntryPoint {
   prefixedEntries?: string[];
 }
 
-export interface WebpackPluginRendererConfig {
-  /**
-   * The webpack config for your renderer process
-   */
-  config: () => Configuration;
-  /**
-   * Instructs webpack to emit a JSON file containing statistics about modules, the dependency
-   * graph, and various other build information for the renderer process during the app
-   * packaging process. This file is located in `.webpack/renderer/stats.json`, but is not
-   * actually packaged with your app.
-   */
-  jsonStats?: boolean;
-  entryPoint: WebpackPluginEntryPoint;
-}
-
 export interface WebpackPluginConfig {
   /**
    * Instructs webpack to emit a JSON file containing statistics about modules, the dependency
@@ -52,10 +37,6 @@ export interface WebpackPluginConfig {
    * `.webpack/main/stats.json`, but is not packaged with your app.
    */
   jsonStats?: boolean;
-  /**
-   * Electron Forge webpack configuration for your renderer process
-   */
-  renderer: WebpackPluginRendererConfig;
   /**
    * The TCP port for the dev servers. Defaults to 3000.
    */

@@ -69,14 +69,14 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
         this.#rootDir = _dir;
         this.#webpackOutputDir = path.resolve(this.#rootDir, '.webpack');
         const devMainConfigGenerator = new WebpackMainConfigGenerator(this.#rootDir, this.#devStrategy, this.#port);
-        const devRendererConfigGenerator = new WebpackRendererConfigGenerator(this.config.renderer.config, this.#rootDir, this.#devStrategy);
+        const devRendererConfigGenerator = new WebpackRendererConfigGenerator(this.#rootDir, this.#devStrategy);
         const prodMainConfigGenerator = new WebpackMainConfigGenerator(this.#rootDir, this.#prodStrategy, this.#port);
-        const prodRendererConfigGenerator = new WebpackRendererConfigGenerator(this.config.renderer.config, this.#rootDir, this.#prodStrategy);
+        const prodRendererConfigGenerator = new WebpackRendererConfigGenerator(this.#rootDir, this.#prodStrategy);
 
         this.#devMainConfig = devMainConfigGenerator.generateConfig();
-        this.#devRendererConfig = devRendererConfigGenerator.generateConfig(this.config.renderer.entryPoint);
-        this.#prodMainConfig = prodMainConfigGenerator.generateConfig()
-        this.#prodRendererConfig = prodRendererConfigGenerator.generateConfig(this.config.renderer.entryPoint);
+        this.#devRendererConfig = [devRendererConfigGenerator.generateNormalConfig(), devRendererConfigGenerator.generatePreloadConfig()];
+        this.#prodMainConfig = prodMainConfigGenerator.generateConfig();
+        this.#prodRendererConfig = [prodRendererConfigGenerator.generateNormalConfig(), prodRendererConfigGenerator.generatePreloadConfig()];
 
         super.init(this.#rootDir, _config);
     }

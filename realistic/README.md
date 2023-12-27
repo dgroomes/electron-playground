@@ -198,7 +198,11 @@ General clean-ups, TODOs and things I wish to implement for this project:
      * DONE Consolidate entry point name/config.
      * DONE Get rid of the config merging code. We don't want cascading behavior.
      * DONE Move basis of main process config closer to the config generation code
-     * Move remainder of main process config closer to the config generation code
+     * DONE Move renderer webpack config to the config generation code
+     * Combine the WebpackRenderConfigGenerator and WebpackMainConfigGenerator into one class. These classes have become
+       smaller now, and also the BuildSupportForgePlugin is now doing too much boilerplate work between the dev/prod and
+       render/render-preload/main dimensions. Or, at least consider something.
+     * Get rid of WebpackPluginConfig entirely.
      * Keep reducing.
     * What is ExternalsPlugin (used in the preload entrypoint)?
 * [ ] Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.

@@ -2,65 +2,6 @@ import type {ForgeConfig} from "@electron-forge/shared-types";
 import {MakerZIP} from "@electron-forge/maker-zip";
 import {WebpackPluginConfig} from "./WebpackPluginConfig";
 import {BuildSupportForgePlugin} from "./BuildSupportForgePlugin";
-import type {Configuration} from "webpack";
-
-/**
- * This is one piece in the puzzle of our integration to React Developer Tools. See the related note in the README.
- * We provide two different HTML entry points. One is the regular 'index.html' file, and the other is the same thing but
- * with the addition of a <script> tag that loads code from the external React Developer Tools instance/server.
- *
- * I don't like the duplication in the two HTML files, but at least it is understandable. I would rather inject the <script>
- * tag conditionally using a template snippet (thanks to the 'html-webpack-plugin' plugin) but unfortunately Electron Forge
- * does not have an extension point to the `new HtmlWebpackPlugin()` call where we would pass a flag. See these related
- * links:
- *   - https://github.com/electron/forge/blob/b4f6dd9f8da7ba63099e4b802c59d1f56feca0cc/packages/plugin/webpack/src/WebpackConfig.ts#L269
- *   - https://github.com/electron/forge/issues/2968
- */
-function htmlEntrypoint(): string {
-    if (process.env.ELECTRON_PLAYGROUND_CONNECT_TO_REACT_DEVTOOLS === 'true') {
-        return "./src/index_connect_react_devtools.html";
-    } else {
-        return "./src/index.html";
-    }
-}
-
-function staticRendererConfig(): Configuration {
-    return {
-        plugins: [],
-        stats: {
-            logging: "verbose",
-        },
-        infrastructureLogging: {
-            level: "verbose",
-        },
-        module: {
-            rules: [
-                {
-                    test: /\.tsx?$/,
-                    exclude: /(node_modules|\.webpack)/,
-                    use: {
-                        loader: "ts-loader",
-                    },
-                },
-                {
-                    test: /\.css$/,
-                    use: [{loader: 'style-loader'}, {loader: 'css-loader'}],
-                }
-            ],
-        },
-        performance: {
-            // During development, the bundle size exceeds a default webpack configuration which exists as a "performance
-            // hint". This is annoying because it's not actionable. The bundle is so large because we're using style-loader
-            // and other things and somehow this gets over 250KiB (I'm surprised by that). But this is a normal/mainstream
-            // setup, so we consider the warning message a false alarm. Turn it off. See the related discussion: https://github.com/webpack/webpack/issues/3486
-            hints: false
-        },
-
-        resolve: {
-            extensions: [".js", ".ts", ".jsx", ".tsx", ".css"],
-        },
-    };
-}
 
 const webpackPluginConfig: WebpackPluginConfig = {
     // The Content Security Policy (CSP) is a useful security feature of browser pages, including in Electron apps.
@@ -87,22 +28,7 @@ const webpackPluginConfig: WebpackPluginConfig = {
     // And when I put a breakpoint at this line, I can tell it's trying to add a 'style' element to the 'head'
     // element. Again, this is NOT an inline style. And I can't find any language in MDN that defines inline
     // styles, but if I dig through to the CSP specs and proposals I would eventually find some logic.
-    devContentSecurityPolicy: "default-src 'self' http: https: ws:; style-src-elem 'self' 'unsafe-inline'",
-    renderer: {
-        config: staticRendererConfig,
-        // Entrypoints are an Electron Forge concept, but they closely resemble webpack 'Entry' objects.
-        // You might have multiple entrypoints if say you're product has a "new UI" and an "old UI". Or maybe
-        // you just have a multipage application with pages like "/home", "/about", "/contact", and you handle
-        // page transitions from the electron main process. For now, I'm only supporting one entrypoint until I can
-        // wrangle the build complexity.
-        entryPoint: {
-            html: htmlEntrypoint(),
-            js: "./src/renderer.tsx",
-            preload: {
-                js: "./src/preload.ts",
-            },
-        }
-    },
+    devContentSecurityPolicy: "default-src 'self' http: https: ws:; style-src-elem 'self' 'unsafe-inline'"
 };
 
 const config: ForgeConfig = {
