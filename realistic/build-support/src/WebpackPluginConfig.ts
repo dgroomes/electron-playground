@@ -47,10 +47,6 @@ export interface WebpackPluginRendererConfig {
 
 export interface WebpackPluginConfig {
   /**
-   * The webpack config for your main process
-   */
-  mainConfig: () => Configuration;
-  /**
    * Instructs webpack to emit a JSON file containing statistics about modules, the dependency
    * graph, and various other build information for the main process. This file is located in
    * `.webpack/main/stats.json`, but is not packaged with your app.
@@ -99,5 +95,3 @@ export interface WebpackPluginConfig {
    */
   devServer?: Omit<WebpackDevServer.Configuration, 'port' | 'static' | 'setupExitSignals' | 'Content-Security-Policy'>;
 }
-
-export const MAIN_WINDOW = "main_window";

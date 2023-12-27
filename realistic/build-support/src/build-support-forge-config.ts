@@ -24,35 +24,6 @@ function htmlEntrypoint(): string {
     }
 }
 
-function staticMainConfig(): Configuration {
-    return {
-        devtool: 'source-map',
-        target: 'electron-main',
-        module: {
-            rules: [
-                {
-                    test: /\.tsx?$/,
-                    exclude: /(node_modules|\.webpack)/,
-                    use: {
-                        loader: "ts-loader",
-                    },
-                },
-            ],
-        },
-        output: {
-            filename: 'index.js',
-            libraryTarget: 'commonjs2',
-        },
-        resolve: {
-            extensions: [".js", ".ts", ".jsx", ".tsx", ".css", ".json"],
-        },
-        node: {
-            __dirname: false,
-            __filename: false,
-        },
-    };
-}
-
 function staticRendererConfig(): Configuration {
     return {
         plugins: [],
@@ -92,7 +63,6 @@ function staticRendererConfig(): Configuration {
 }
 
 const webpackPluginConfig: WebpackPluginConfig = {
-    mainConfig: staticMainConfig,
     // The Content Security Policy (CSP) is a useful security feature of browser pages, including in Electron apps.
     // Learn more it at the following links:
     //

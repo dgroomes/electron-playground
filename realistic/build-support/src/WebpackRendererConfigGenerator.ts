@@ -3,7 +3,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import webpack, {Configuration} from 'webpack';
 import {EnvStrategy} from './EnvStrategy';
 
-import {MAIN_WINDOW, WebpackPluginEntryPoint, WebpackPreloadEntryPoint,} from './WebpackPluginConfig';
+import {WebpackPluginEntryPoint, WebpackPreloadEntryPoint,} from './WebpackPluginConfig';
 
 export default class WebpackRendererConfigGenerator {
 
@@ -62,14 +62,14 @@ export default class WebpackRendererConfigGenerator {
     const returnConfig: webpack.Configuration = this.configGenerator();
     this.enrichWithCommonConfig(returnConfig);
 
-    returnConfig.entry = { [MAIN_WINDOW]: entryPoint.js };
+    returnConfig.entry = { ["main_window"]: entryPoint.js };
     returnConfig.output.filename = '[name]/index.js';
     returnConfig.plugins = [
       new HtmlWebpackPlugin({
-        title: MAIN_WINDOW,
+        title: "main_window",
         template: entryPoint.html,
-        filename: `${MAIN_WINDOW}/index.html`,
-        chunks: [MAIN_WINDOW],
+        filename: `main_window/index.html`,
+        chunks: ["main_window"],
       })
     ];
 
@@ -81,7 +81,7 @@ export default class WebpackRendererConfigGenerator {
     const returnConfig = this.configGenerator();
     this.enrichWithCommonConfig(returnConfig);
 
-    returnConfig.entry = { [MAIN_WINDOW]: preload.js };
+    returnConfig.entry = { ["main_window"]: preload.js };
     returnConfig.output.filename = '[name]/preload.js';
     returnConfig.plugins = [new webpack.ExternalsPlugin('commonjs2', externals)];
 

@@ -8,7 +8,7 @@ import path from "path";
 export interface EnvStrategy {
     mode(): Configuration["mode"];
     publicPath(): Configuration["output"]["publicPath"];
-    preloadDefine(webpackOutputDir: string, entryPointName: string): string;
+    rendererPreloadEntryPoint(webpackOutputDir: string, entryPointName: string): string;
     rendererEntryPoint(entryPointName: string, basename: string, port: number): string;
 }
 
@@ -21,7 +21,7 @@ export class ProductionEnvStrategy implements EnvStrategy {
         return undefined;
     }
 
-    preloadDefine(_webpackOutputDir: string, entryPointName: string): string {
+    rendererPreloadEntryPoint(_webpackOutputDir: string, entryPointName: string): string {
         return `require('path').resolve(__dirname, '../renderer', '${entryPointName}', 'preload.js')`;
     }
 
@@ -40,7 +40,7 @@ export class DevelopmentEnvStrategy implements EnvStrategy {
         return "/";
     }
 
-    preloadDefine(webpackOutputDir: string, entryPointName: string): string {
+    rendererPreloadEntryPoint(webpackOutputDir: string, entryPointName: string): string {
         return `'${path.resolve(webpackOutputDir, 'renderer', entryPointName, 'preload.js').replace(/\\/g, '\\\\')}'`;
     }
 

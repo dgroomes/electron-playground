@@ -2,19 +2,17 @@ import path from 'path';
 import {Configuration, DefinePlugin} from 'webpack';
 import {EnvStrategy} from './EnvStrategy';
 
-import {MAIN_WINDOW} from './WebpackPluginConfig'
-
-// noinspection JSUnusedGlobalSymbols
+/**
+ * Generate a Webpack configuration for the main process.
+ */
 export default class WebpackMainConfigGenerator {
 
-  readonly #config: Configuration;
   readonly #webpackOutputDir: string;
   readonly #envStrategy: EnvStrategy;
   readonly #projectDir: string;
   readonly #port: number;
 
-  constructor(config: Configuration, projectDir: string, envStrategy: EnvStrategy, port: number) {
-    this.#config = config;
+  constructor(projectDir: string, envStrategy: EnvStrategy, port: number) {
     this.#webpackOutputDir = path.resolve(projectDir, '.webpack');
     this.#envStrategy = envStrategy;
     this.#projectDir = projectDir;
@@ -26,35 +24,62 @@ export default class WebpackMainConfigGenerator {
    * @private
    */
   public generateConfig() : Configuration {
-    const mainConfig = this.#config;
-    mainConfig.entry = path.resolve(this.#projectDir, "./src/main.ts");
-    mainConfig.output.path = path.resolve(this.#webpackOutputDir, 'main');
-    mainConfig.mode =  this.#envStrategy.mode()
-    mainConfig.plugins = [new DefinePlugin(this.getDefines(this.#envStrategy))];
-    // Not sure if this is really needed. We are using 'source-map' in the renderer but not sure what we want in the main
-    // process.
-    mainConfig.devtool = 'eval-source-map';
-    return mainConfig;
+    const config: Configuration = this.configBasis();
+    this.customizeForEnvironment(config);
+    return config;
   }
 
   /**
-   * This was ported from the WebpackConfigGenerator. It's a bit awkward right now.
+   * The "basis" of the configuration for the main process.
+   *
+   * The properties defined here are the same across environments.
    */
-  private getDefines(envStrategy: EnvStrategy): Record<string, string> {
-    const defines: Record<string, string> = {};
-    const entryKey = this.toEnvironmentVariable();
-    defines[entryKey] = envStrategy.rendererEntryPoint(MAIN_WINDOW, 'index.html', this.#port);
-    defines[`process.env.${entryKey}`] = defines[entryKey];
-
-    const preloadDefineKey = this.toEnvironmentVariable(true);
-    defines[preloadDefineKey] = envStrategy.preloadDefine(this.#webpackOutputDir, MAIN_WINDOW);
-    defines[`process.env.${preloadDefineKey}`] = defines[preloadDefineKey];
-
-    return defines;
+  private configBasis() {
+      return {
+          target: 'electron-main',
+          // Know your options when it comes to the 'devtool' configuration, which controls how source maps are generated.
+          // See https://webpack.js.org/configuration/devtool/
+          devtool: 'eval-source-map',
+          module: {
+              rules: [
+                  {
+                      test: /\.tsx?$/,
+                      exclude: /(node_modules|\.webpack)/,
+                      use: {
+                          loader: "ts-loader",
+                      },
+                  },
+              ],
+          },
+          output: {
+              filename: 'index.js',
+              libraryTarget: 'commonjs2',
+          },
+          resolve: {
+              extensions: [".js", ".ts", ".jsx", ".tsx", ".css", ".json"],
+          },
+          node: {
+              __dirname: false,
+              __filename: false,
+          },
+      };
   }
 
-  private toEnvironmentVariable(preload = false): string {
-    const suffix = preload ? '_PRELOAD_WEBPACK_ENTRY' : '_WEBPACK_ENTRY';
-    return `${MAIN_WINDOW.toUpperCase().replace(/ /g, '_')}${suffix}`;
-  }
+    /**
+     * Customize the given configuration with properties that depend on the environment.
+     */
+    private customizeForEnvironment(config) {
+        config.entry = path.resolve(this.#projectDir, "./src/main.ts");
+        config.output.path = path.resolve(this.#webpackOutputDir, 'main');
+        config.mode = this.#envStrategy.mode();
+        const entryPoint = this.#envStrategy.rendererEntryPoint("main_window", 'index.html', this.#port);
+        const preloadEntryPoint = this.#envStrategy.rendererPreloadEntryPoint(this.#webpackOutputDir, "main_window")
+        const definitions = {
+            "MAIN_WINDOW_WEBPACK_ENTRY": entryPoint,
+            "process.env.MAIN_WINDOW_WEBPACK_ENTRY": entryPoint,
+            "MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY": preloadEntryPoint,
+            "process.env.MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY": preloadEntryPoint
+        }
+        config.plugins = [new DefinePlugin(definitions)];
+    }
 }
