@@ -12,7 +12,6 @@ import WebpackRendererConfigGenerator from "./WebpackRendererConfigGenerator";
 import * as console from "console";
 import * as path from "path";
 import {webpackRunPromisified, webpackWatchPromisified} from "./webpack-util";
-import {WebpackPluginConfig} from "./WebpackPluginConfig";
 import {DevelopmentEnvStrategy, ProductionEnvStrategy} from "./EnvStrategy";
 import WebpackMainConfigGenerator from "./WebpackMainConfigGenerator";
 
@@ -30,7 +29,7 @@ import WebpackMainConfigGenerator from "./WebpackMainConfigGenerator";
  *   - https://github.com/electron/forge/blob/b4f6dd9f8da7ba63099e4b802c59d1f56feca0cc/packages/plugin/webpack/src/WebpackPlugin.ts#L309
  *   - https://github.com/electron/forge/blob/b4f6dd9f8da7ba63099e4b802c59d1f56feca0cc/packages/plugin/webpack/src/WebpackPlugin.ts#L311
  */
-export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
+export class BuildSupportForgePlugin extends PluginBase<null> {
     name: string = "BuildSupportForgePlugin";
 
     // This is the root directory of the project itself.
@@ -53,9 +52,9 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
     #devStrategy = new DevelopmentEnvStrategy();
     #prodStrategy = new ProductionEnvStrategy();
 
-    constructor(config: WebpackPluginConfig) {
-        super(config);
-        this.#port = config.port || 3000;
+    constructor() {
+        super(null);
+        this.#port = 3000;
 
         // Make sure to bind class methods to this instance so that they don't become headless. In particular, the startLogic()
         // is called with a different 'this' context in the Electron Forge code. See https://github.com/electron/forge/blob/61d398abde51a21e280e59d319d5a77dbf3f7936/packages/api/core/src/util/plugin-interface.ts#L154
@@ -154,7 +153,32 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
             setupExitSignals: true, // Not sure what this is. I copied it from Forge's own WebpackDevServer config.
             static: path.resolve(this.#webpackOutputDir, "renderer"), // I don't think I should qualify this anymore. Well... I haven't thought through the implications of not using two webpack compilers.
             headers: {
-                "Content-Security-Policy": this.config.devContentSecurityPolicy,
+
+                // The Content Security Policy (CSP) is a useful security feature of browser pages, including in Electron apps.
+                // Learn more it at the following links:
+                //
+                // - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
+                // - https://github.com/electron/electron/issues/19775
+                //
+                // We need to include 'ws:' because webpack uses WebSockets for reloading changed resources. This feature
+                // is called Hot Module Reloading (HMR).
+                //
+                // We need 'unsafe-inline' for styles, because the effect of webpack's 'style-loader' is that the web page
+                // applies its styles by some JavaScript code that appends a '<style>' element to the '<head>' element. To me,
+                // this is NOT inline styles, it's just an internal style sheet. Inline styles would be setting the style
+                // attribute on individual elements. So, I'm pretty confused. Also, in the same surprising spirit, even with
+                // a seemingly conservative CSP, you can still set styles via the CSS object model in JavaScript (see https://stackoverflow.com/q/36870421).
+                // So, I haven't really figured out this CSP thing, but I'm leaving this note to at least preserve some basic
+                // understanding.
+                //
+                // Specifically, without the CSP I get the error message:
+                //
+                //     Refused to apply inline style because it violates the following Content Security Policy (insertBySelector.js:32)
+                //
+                // And when I put a breakpoint at this line, I can tell it's trying to add a 'style' element to the 'head'
+                // element. Again, this is NOT an inline style. And I can't find any language in MDN that defines inline
+                // styles, but if I dig through to the CSP specs and proposals I would eventually find some logic.
+                "Content-Security-Policy": "default-src 'self' http: https: ws:; style-src-elem 'self' 'unsafe-inline'"
             },
         };
 
