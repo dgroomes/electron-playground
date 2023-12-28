@@ -6,13 +6,13 @@ import {
     StartOptions,
     StartResult
 } from "@electron-forge/shared-types";
-import {Configuration, Watching, webpack} from "webpack";
+import {Watching, webpack} from "webpack";
 import WebpackDevServer from "webpack-dev-server";
 import * as console from "console";
 import * as path from "path";
 import {webpackRunPromisified, webpackWatchPromisified} from "./webpack-util";
 import {DevelopmentEnvStrategy, ProductionEnvStrategy} from "./EnvStrategy";
-import WebpackMainConfigGenerator from "./WebpackMainConfigGenerator";
+import {WebpackConfig} from "./WebpackConfig";
 
 /**
  * A custom Electron Forge plugin purpose-built for this project. This plugin is not designed as a generic and reusable
@@ -42,8 +42,8 @@ export class BuildSupportForgePlugin extends PluginBase<null> {
     */
     #webpackOutputDir: string;
     #alreadyStarted: boolean = false;
-    #devConfig: WebpackMainConfigGenerator;
-    #prodConfig: WebpackMainConfigGenerator;
+    #devConfig: WebpackConfig;
+    #prodConfig: WebpackConfig;
     #webpackWatching: Watching;
     readonly #port: number;
     constructor() {
@@ -61,8 +61,8 @@ export class BuildSupportForgePlugin extends PluginBase<null> {
     init(_dir: string, _config: ResolvedForgeConfig) {
         this.#rootDir = _dir;
         this.#webpackOutputDir = path.resolve(this.#rootDir, '.webpack');
-        this.#devConfig = WebpackMainConfigGenerator.create(this.#rootDir, new DevelopmentEnvStrategy(), this.#port);
-        this.#prodConfig = WebpackMainConfigGenerator.create(this.#rootDir, new ProductionEnvStrategy(), this.#port);
+        this.#devConfig = WebpackConfig.create(this.#rootDir, new DevelopmentEnvStrategy(), this.#port);
+        this.#prodConfig = WebpackConfig.create(this.#rootDir, new ProductionEnvStrategy(), this.#port);
         super.init(this.#rootDir, _config);
     }
 
