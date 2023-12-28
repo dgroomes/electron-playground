@@ -208,7 +208,7 @@ General clean-ups, TODOs and things I wish to implement for this project:
 * [ ] Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.
 * [ ] Go away from the `main_window` name because the overloading on the word main is actually extremely confusing, because
   in Electron the there is the "main process".
-* [ ] Format the whole project and be consistent with quotes vs double quotes.
+* [x] DONE Format the whole project and be consistent with quotes vs double quotes.
 * [x] DONE Hot reloading for styles isn't working. That's totally my bad, I knew this and took out the style loader hastily.
   When I change the `index.css` file, the styles should update in the app without a refresh. This is a basic feature
   for a realistic project.

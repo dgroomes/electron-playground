@@ -34,7 +34,7 @@ async function installDevToolsPlugins() {
         const name = await installExtension(REACT_DEVELOPER_TOOLS);
         console.log(`Installed DevTools extension:  ${name}`);
     } catch (err) {
-        throw new Error('An error occurred while trying to install a DevTools extension: ' + err);
+        throw new Error("An error occurred while trying to install a DevTools extension: " + err);
     }
 }
 

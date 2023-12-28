@@ -46,6 +46,7 @@ export class BuildSupportForgePlugin extends PluginBase<null> {
     #prodConfig: WebpackConfig;
     #webpackWatching: Watching;
     readonly #port: number;
+
     constructor() {
         super(null);
         this.#port = 3000;
@@ -60,7 +61,7 @@ export class BuildSupportForgePlugin extends PluginBase<null> {
     // noinspection JSUnusedGlobalSymbols
     init(_dir: string, _config: ResolvedForgeConfig) {
         this.#rootDir = _dir;
-        this.#webpackOutputDir = path.resolve(this.#rootDir, '.webpack');
+        this.#webpackOutputDir = path.resolve(this.#rootDir, ".webpack");
         this.#devConfig = WebpackConfig.create(this.#rootDir, new DevelopmentEnvStrategy(), this.#port);
         this.#prodConfig = WebpackConfig.create(this.#rootDir, new ProductionEnvStrategy(), this.#port);
         super.init(this.#rootDir, _config);
@@ -178,7 +179,7 @@ export class BuildSupportForgePlugin extends PluginBase<null> {
      * Node process (the webpack dev server) stopped too.
      */
     async registerOverallExitHandlerUponElectronExit(_config: ResolvedForgeConfig, electronProcess: ElectronProcess) {
-        electronProcess.on('exit', () => {
+        electronProcess.on("exit", () => {
             if (electronProcess.restarted) return;
             this.#webpackWatching?.close(() => {
             });

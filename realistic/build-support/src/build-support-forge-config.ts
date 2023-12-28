@@ -41,7 +41,7 @@ const config: ForgeConfig = {
         }
     },
     rebuildConfig: {},
-    makers: [new MakerZIP({}, ['darwin'])],
+    makers: [new MakerZIP({}, ["darwin"])],
     plugins: [
         new BuildSupportForgePlugin(),
     ],

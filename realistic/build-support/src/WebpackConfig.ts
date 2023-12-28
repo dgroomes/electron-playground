@@ -1,6 +1,6 @@
-import path from 'path';
-import {Configuration, DefinePlugin, ExternalsPlugin} from 'webpack';
-import {EnvStrategy} from './EnvStrategy';
+import path from "path";
+import {Configuration, DefinePlugin, ExternalsPlugin} from "webpack";
+import {EnvStrategy} from "./EnvStrategy";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 
 /**
@@ -31,7 +31,7 @@ class WebpackConfigGenerator {
     readonly #port: number;
 
     constructor(projectDir: string, envStrategy: EnvStrategy, port: number) {
-        this.#webpackOutputDir = path.resolve(projectDir, '.webpack');
+        this.#webpackOutputDir = path.resolve(projectDir, ".webpack");
         this.#envStrategy = envStrategy;
         this.#projectDir = projectDir;
         this.#port = port;
@@ -50,10 +50,10 @@ class WebpackConfigGenerator {
      */
     private mainProcessConfigBasis() {
         return {
-            target: 'electron-main',
+            target: "electron-main",
             // Know your options when it comes to the 'devtool' configuration, which controls how source maps are generated.
             // See https://webpack.js.org/configuration/devtool/
-            devtool: 'eval-source-map',
+            devtool: "eval-source-map",
             module: {
                 rules: [
                     {
@@ -66,8 +66,8 @@ class WebpackConfigGenerator {
                 ],
             },
             output: {
-                filename: 'index.js',
-                libraryTarget: 'commonjs2',
+                filename: "index.js",
+                libraryTarget: "commonjs2",
             },
             resolve: {
                 extensions: [".js", ".ts", ".jsx", ".tsx", ".css", ".json"],
@@ -84,9 +84,9 @@ class WebpackConfigGenerator {
      */
     private customizeForEnvironment(config: Configuration) {
         config.entry = path.resolve(this.#projectDir, "./src/main.ts");
-        config.output.path = path.resolve(this.#webpackOutputDir, 'main');
+        config.output.path = path.resolve(this.#webpackOutputDir, "main");
         config.mode = this.#envStrategy.mode();
-        const entryPoint = this.#envStrategy.rendererEntryPoint("main_window", 'index.html', this.#port);
+        const entryPoint = this.#envStrategy.rendererEntryPoint("main_window", "index.html", this.#port);
         const preloadEntryPoint = this.#envStrategy.rendererPreloadEntryPoint(this.#webpackOutputDir, "main_window")
         const definitions = {
             "MAIN_WINDOW_WEBPACK_ENTRY": entryPoint,
@@ -104,14 +104,14 @@ class WebpackConfigGenerator {
      */
     private rendererProcessConfigBasis(): Configuration {
         return {
-            target: 'web',
+            target: "web",
             // Let's use 'source-map' instead of the default behavior which uses 'eval'. When 'eval' is used, then we need to
             // relax the Content-Security-Policy rule to allow 'unsafe-eval'. This is not a great trade-off in my case, because
             // I don't need the extra build speed of the default behavior, and I'd prefer to appease the security preferences of
             // the browser, which logs an annoying warning to the console when 'unsafe-eval' is used.
             devtool: "source-map",
             output: {
-                globalObject: 'self',
+                globalObject: "self",
             },
             node: {
                 __dirname: false,
@@ -135,7 +135,7 @@ class WebpackConfigGenerator {
                     },
                     {
                         test: /\.css$/,
-                        use: [{loader: 'style-loader'}, {loader: 'css-loader'}],
+                        use: [{loader: "style-loader"}, {loader: "css-loader"}],
                     }
                 ],
             },
@@ -160,7 +160,7 @@ class WebpackConfigGenerator {
     private customizeRendererProcessConfigForEnvironment(config: Configuration) {
         config.mode = this.#envStrategy.mode();
         config.output = {
-            path: path.resolve(this.#webpackOutputDir, 'renderer'),
+            path: path.resolve(this.#webpackOutputDir, "renderer"),
             publicPath: this.#envStrategy.publicPath(),
         };
     }
@@ -170,7 +170,7 @@ class WebpackConfigGenerator {
         this.customizeRendererProcessConfigForEnvironment(config);
 
         config.entry = {["main_window"]: "./src/renderer.tsx"};
-        config.output.filename = '[name]/index.js';
+        config.output.filename = "[name]/index.js";
         config.plugins = [
             new HtmlWebpackPlugin({
                 title: "main_window",
@@ -184,13 +184,13 @@ class WebpackConfigGenerator {
     }
 
     public generateRendererProcessPreloadConfig() {
-        const externals = ['electron', 'electron/renderer', 'electron/common', 'events', 'timers', 'url'];
+        const externals = ["electron", "electron/renderer", "electron/common", "events", "timers", "url"];
         const config = this.rendererProcessConfigBasis();
         this.customizeRendererProcessConfigForEnvironment(config);
 
         config.entry = {["main_window"]: "./src/preload.ts"};
-        config.output.filename = '[name]/preload.js';
-        config.plugins = [new ExternalsPlugin('commonjs2', externals)];
+        config.output.filename = "[name]/preload.js";
+        config.plugins = [new ExternalsPlugin("commonjs2", externals)];
 
         return config;
     }
@@ -209,7 +209,7 @@ class WebpackConfigGenerator {
  *   - https://github.com/electron/forge/issues/2968
  */
 function htmlEntrypoint(): string {
-    if (process.env.ELECTRON_PLAYGROUND_CONNECT_TO_REACT_DEVTOOLS === 'true') {
+    if (process.env.ELECTRON_PLAYGROUND_CONNECT_TO_REACT_DEVTOOLS === "true") {
         return "./src/index_connect_react_devtools.html";
     } else {
         return "./src/index.html";

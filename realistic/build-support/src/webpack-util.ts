@@ -1,4 +1,4 @@
-import {Compiler, MultiCompiler, MultiStats, Stats, Watching} from 'webpack';
+import {Compiler, MultiCompiler, MultiStats, Stats, Watching} from "webpack";
 
 /*
 webpack utility functions
