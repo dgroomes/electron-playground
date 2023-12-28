@@ -6,13 +6,13 @@ import {
     StartOptions,
     StartResult
 } from "@electron-forge/shared-types";
-import {Configuration, Watching, webpack} from "webpack";
+import {Watching, webpack} from "webpack";
 import WebpackDevServer from "webpack-dev-server";
-import {WebpackPluginConfig} from "@electron-forge/plugin-webpack";
-import WebpackConfigGenerator from "@electron-forge/plugin-webpack/dist/WebpackConfig";
 import * as console from "console";
 import * as path from "path";
 import {webpackRunPromisified, webpackWatchPromisified} from "./webpack-util";
+import {DevelopmentEnvStrategy, ProductionEnvStrategy} from "./EnvStrategy";
+import {WebpackConfig} from "./WebpackConfig";
 
 /**
  * A custom Electron Forge plugin purpose-built for this project. This plugin is not designed as a generic and reusable
@@ -28,11 +28,11 @@ import {webpackRunPromisified, webpackWatchPromisified} from "./webpack-util";
  *   - https://github.com/electron/forge/blob/b4f6dd9f8da7ba63099e4b802c59d1f56feca0cc/packages/plugin/webpack/src/WebpackPlugin.ts#L309
  *   - https://github.com/electron/forge/blob/b4f6dd9f8da7ba63099e4b802c59d1f56feca0cc/packages/plugin/webpack/src/WebpackPlugin.ts#L311
  */
-export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
+export class BuildSupportForgePlugin extends PluginBase<null> {
     name: string = "BuildSupportForgePlugin";
 
     // This is the root directory of the project itself.
-    private rootDir: string;
+    #rootDir: string;
 
     /*
     This is the directory where webpack will write its output files. This is a form of an "out/" or "build/" directory.
@@ -40,49 +40,30 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
     This is not a common convention in the broader ecosystem but let's follow it here (in part because we have to for
     now, because we're still using the WebpackConfigGenerator which hard codes to that convention).
     */
-    private webpackOutputDir: string;
-    private alreadyStarted: boolean = false;
-    private devConfigGenerator: WebpackConfigGenerator;
-    private prodConfigGenerator: WebpackConfigGenerator;
-    private devMainConfig: Configuration;
-    private devRendererConfig: Configuration[];
-    private prodMainConfig: Configuration;
-    private prodRendererConfig: Configuration[];
-    private webpackWatching: Watching;
-    private readonly port: number;
-
-    constructor(config: WebpackPluginConfig) {
-        super(config);
-        this.port = config.port || 3000;
+    #webpackOutputDir: string;
+    #alreadyStarted: boolean = false;
+    #devConfig: WebpackConfig;
+    #prodConfig: WebpackConfig;
+    #webpackWatching: Watching;
+    readonly #port: number;
+    constructor() {
+        super(null);
+        this.#port = 3000;
 
         // Make sure to bind class methods to this instance so that they don't become headless. In particular, the startLogic()
         // is called with a different 'this' context in the Electron Forge code. See https://github.com/electron/forge/blob/61d398abde51a21e280e59d319d5a77dbf3f7936/packages/api/core/src/util/plugin-interface.ts#L154
         this.startLogic = this.startLogic.bind(this);
-        this.secondInit = this.secondInit.bind(this);
         this.buildForProduction = this.buildForProduction.bind(this);
         this.registerOverallExitHandlerUponElectronExit = this.registerOverallExitHandlerUponElectronExit.bind(this);
     }
 
+    // noinspection JSUnusedGlobalSymbols
     init(_dir: string, _config: ResolvedForgeConfig) {
-        this.rootDir = _dir;
-        this.webpackOutputDir = path.resolve(this.rootDir, '.webpack');
-        this.devConfigGenerator = new WebpackConfigGenerator(this.config, this.rootDir, false, this.port);
-        this.prodConfigGenerator = new WebpackConfigGenerator(this.config, this.rootDir, true, this.port);
-        super.init(this.rootDir, _config);
-    }
-
-    /**
-     * Unfortunately, the Electron Forge plugin framework does not support async initialization. We need this because
-     * the WebpackConfigGenerator is async (which itself is not cool, let's visit that later). So we'll cheat by inventing
-     * a second init-style method, and we'll wire it in via the "generateAssets" hook. This is a hack! I wish there was
-     * a more appropriate hook to do this but there are only a few hooks.
-     */
-    private async secondInit() {
-        console.log("BuildSupportForgePlugin.secondInit() called");
-        this.devMainConfig = await this.devConfigGenerator.getMainConfig();
-        this.devRendererConfig = await this.devConfigGenerator.getRendererConfig(this.config.renderer.entryPoints);
-        this.prodMainConfig = await this.prodConfigGenerator.getMainConfig();
-        this.prodRendererConfig = await this.prodConfigGenerator.getRendererConfig(this.config.renderer.entryPoints);
+        this.#rootDir = _dir;
+        this.#webpackOutputDir = path.resolve(this.#rootDir, '.webpack');
+        this.#devConfig = WebpackConfig.create(this.#rootDir, new DevelopmentEnvStrategy(), this.#port);
+        this.#prodConfig = WebpackConfig.create(this.#rootDir, new ProductionEnvStrategy(), this.#port);
+        super.init(this.#rootDir, _config);
     }
 
     /**
@@ -100,7 +81,7 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
     private async buildForProduction() {
         // Because there is no watching, and no dev servers involved, we can afford to express all webpack 'Configuration'
         // objects into the same webpack compiler object. Then, we just invoke the compiler once. We promisify the call.
-        const config = [this.prodMainConfig, ...this.prodRendererConfig]
+        const config = [this.#prodConfig.mainProcessConfig, this.#prodConfig.rendererProcessPreloadConfig, this.#prodConfig.rendererProcessNormalConfig];
         const compiler = webpack(config);
         const stats = await webpackRunPromisified(compiler);
         if (stats.hasErrors()) {
@@ -108,6 +89,7 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
         }
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * Electron Forge has a "hooks" system that allows plugins to extend the build process.
      *
@@ -116,7 +98,6 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
      */
     getHooks(): ForgeMultiHookMap {
         return {
-            generateAssets: this.secondInit,
             prePackage: this.buildForProduction,
             postStart: this.registerOverallExitHandlerUponElectronExit
         };
@@ -128,11 +109,11 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
     async startLogic(_startOpts: StartOptions): Promise<StartResult> {
         console.log("MyForgeWebpackPlugin.startLogic() called");
 
-        if (this.alreadyStarted) return false;
-        this.alreadyStarted = true;
+        if (this.#alreadyStarted) return false;
+        this.#alreadyStarted = true;
 
         // Compile the main process bundles. The returned promise resolves when the compilation is complete.
-        const mainCompiler = webpack(this.devMainConfig);
+        const mainCompiler = webpack(this.#devConfig.mainProcessConfig);
         const compileMainPromise = webpackWatchPromisified(mainCompiler).currentCompilation();
 
         const rendererServer = await this.rendererServer();
@@ -146,7 +127,7 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
      *  Create and configure a webpack compiler and webpack-dev-server for the renderer process bundles.
      */
     private async rendererServer(): Promise<WebpackDevServer> {
-        const compiler = webpack(this.devRendererConfig);
+        const compiler = webpack([this.#devConfig.rendererProcessPreloadConfig, this.#devConfig.rendererProcessNormalConfig]);
 
         const devServerConfig: WebpackDevServer.Configuration = {
             hot: true,
@@ -154,11 +135,36 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
                 writeToDisk: true,
             },
             historyApiFallback: true, // Not sure what this is. I copied it from Forge's own WebpackDevServer config.
-            port: this.port,
+            port: this.#port,
             setupExitSignals: true, // Not sure what this is. I copied it from Forge's own WebpackDevServer config.
-            static: path.resolve(this.webpackOutputDir, "renderer"), // I don't think I should qualify this anymore. Well... I haven't thought through the implications of not using two webpack compilers.
+            static: path.resolve(this.#webpackOutputDir, "renderer"), // I don't think I should qualify this anymore. Well... I haven't thought through the implications of not using two webpack compilers.
             headers: {
-                "Content-Security-Policy": this.config.devContentSecurityPolicy,
+
+                // The Content Security Policy (CSP) is a useful security feature of browser pages, including in Electron apps.
+                // Learn more it at the following links:
+                //
+                // - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
+                // - https://github.com/electron/electron/issues/19775
+                //
+                // We need to include 'ws:' because webpack uses WebSockets for reloading changed resources. This feature
+                // is called Hot Module Reloading (HMR).
+                //
+                // We need 'unsafe-inline' for styles, because the effect of webpack's 'style-loader' is that the web page
+                // applies its styles by some JavaScript code that appends a '<style>' element to the '<head>' element. To me,
+                // this is NOT inline styles, it's just an internal style sheet. Inline styles would be setting the style
+                // attribute on individual elements. So, I'm pretty confused. Also, in the same surprising spirit, even with
+                // a seemingly conservative CSP, you can still set styles via the CSS object model in JavaScript (see https://stackoverflow.com/q/36870421).
+                // So, I haven't really figured out this CSP thing, but I'm leaving this note to at least preserve some basic
+                // understanding.
+                //
+                // Specifically, without the CSP I get the error message:
+                //
+                //     Refused to apply inline style because it violates the following Content Security Policy (insertBySelector.js:32)
+                //
+                // And when I put a breakpoint at this line, I can tell it's trying to add a 'style' element to the 'head'
+                // element. Again, this is NOT an inline style. And I can't find any language in MDN that defines inline
+                // styles, but if I dig through to the CSP specs and proposals I would eventually find some logic.
+                "Content-Security-Policy": "default-src 'self' http: https: ws:; style-src-elem 'self' 'unsafe-inline'"
             },
         };
 
@@ -174,7 +180,7 @@ export class BuildSupportForgePlugin extends PluginBase<WebpackPluginConfig> {
     async registerOverallExitHandlerUponElectronExit(_config: ResolvedForgeConfig, electronProcess: ElectronProcess) {
         electronProcess.on('exit', () => {
             if (electronProcess.restarted) return;
-            this.webpackWatching?.close(() => {
+            this.#webpackWatching?.close(() => {
             });
             process.exit();
         });

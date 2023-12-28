@@ -59,6 +59,13 @@ Follow these instructions to build and run the app.
     maker).
 
 
+Rebuilding and re-installing `build-support` is a bit of a pain. Try this alias to make it easier:
+
+```shell
+alias rbs='cd build-support && npm install && npm run build && npm pack && cd .. && npm install --save-dev ./build-support/electron-playground_realistic_build-support-1.0.0.tgz'
+```
+
+
 ## Instructions for React DevTools
 
 When you develop a React application, you'll likely want the power of the excellent [React Developer Tools](https://react.dev/learn/react-developer-tools)
@@ -156,12 +163,52 @@ General clean-ups, TODOs and things I wish to implement for this project:
     * DONE Combine config
     * ABANDON (No this is too odd) Consider starting Electron Forge from the Node API instead of the CLI via start script. I'd like to get rid of the
       `forge.config.ts` file if possible. The project plugin is the monolithic entity, including config.
-* [ ] SKIP Drop the `WebpackConfig.ts` code and use my own webpack config (this is phase 2 of the overall custom plugin)
-    * Update: maybe I won't do this. The AssetRelocatorPatch is a particularly nasty implementation detail. I don't want
-      to maintain that.
-    * What is AssetRelocatorPatch (used in the main entrypoint)?
-    * What is ExternalsPlugin (used in the preload entrypoint)?
+* [x] DONE Drop the `WebpackConfig.ts` code and use my own webpack config (this is phase 2 of the overall custom plugin)
+    * DONE Remove `@electron-forge/plugin-webpack` and wholesale copy over the needed code. I will gradually
+      rewrite it.
+    * DONE (it's not even used; maybe it was used for the native rebuilding which is something I also don't want) The AssetRelocatorPatch is a particularly nasty implementation detail. I don't really want to maintain it.
+    * I think keeping the forge config as a standalone const object is fine. I think inlining
+      the webpack config closer to code, in the `BuildSupportForgePlugin` is good. It has more dynamic content like resolving
+      the absolute paths and the prod/dev differences. The official WebpackForgePlugin proliferates dev/prod checks throughout
+      many if statements. I think they were very close to a good model, where the WebpackConfigGenerator should be implemented
+      by a "dev strategy" and a "prod strategy". I'm going to take that concept and implement that. But I'm going to keep
+      the common code and utility functions separate from the prod/dev stuff (that got too co-mingled in the official
+      plugin). `webpack-util.ts` has worked well, I might push more webpack-specific stuff into there.
+    * DONE dev/prod strategy objects.
+    * DONE (nice, true private class fields worked, but unfortunately I can't seem them in the debugger. Similar to [this YouTrack issue](https://youtrack.jetbrains.com/issue/WEB-52294/Javascript-Debugging-show-private-properties-on-objects-in-watches-variables)) Fix `make` task. There's a problem because Electron Forge has some code to expand fields on the Electron
+      Forge config object using Lodash (quite dangerous in my estimation but so be it) and it's reaching all the way into
+      the webpack config object which has some fields with `$` in them which are used in the DefinesPlugin. We don't
+      want this, it errors. The Forge code just indiscriminately expands all fields. I think I should be able to hide
+      them somehow, make them non-enumerable or whatever.
+    * DONE Remove support for multiple preload. Let's just fixate to one for now. I need to get a handle on the code.
+       * `WebpackPluginEntryPointPreloadOnly` is modelled misleadingly. That type, in practice, actually applies to entry
+         points that do indeed have html or js. Similarly, look at the contrasting `isPreloadOnly` and `hasPreloadScript`
+         which are type guards for `WebpackPluginEntryPointPreloadOnly`.
+         * DONE Remove support for "preload with configuration". This takes a special case in the code, and we
+           don't use it.
+         * DONE Can I get rid of `WebpackPluginEntryPointNoWindow`?
+         * DONE Can I get rid of `WebpackPluginEntryPointPreloadOnly`?
+         * DONE `WebpackPluginEntryPointLocalWindow` and `WebpackPluginEntryPointBase` should go away and only leave `WebpackPluginEntryPoint`
+     * DONE Remove prefixed entries. Not sure what this is exactly, but I'm not using it. 
+     * DONE Remove Node integration flag. Not used.
+       * Follow the knock-on collapse.
+     * DONE Do we need multiple entrypoints?
+     * DONE Visit `buildRendererBaseConfig` and `rendererTargetToWebpackTarget`. They needlessly accept `RendererTarget.SandboxedPreload`
+       as their only argument. Also visit `buildRendererConfigForWebOrRendererTarget`, similar thing.
+     * DONE Consolidate entry point name/config.
+     * DONE Get rid of the config merging code. We don't want cascading behavior.
+     * DONE Move basis of main process config closer to the config generation code
+     * DONE Move renderer webpack config to the config generation code
+     * DONE Combine the WebpackRenderConfigGenerator and WebpackMainConfigGenerator into one class. These classes have become
+       smaller now, and also the BuildSupportForgePlugin is now doing too much boilerplate work between the dev/prod and
+       render/render-preload/main dimensions. Or, at least consider something.
+       * DONE Rename WebpackMainConfigGenerator to just WebpackConfig. 
+     * DONE Get rid of WebpackPluginConfig entirely.
+* [ ] What is ExternalsPlugin (used in the preload entrypoint)?
 * [ ] Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.
+* [ ] Go away from the `main_window` name because the overloading on the word main is actually extremely confusing, because
+  in Electron the there is the "main process".
+* [ ] Format the whole project and be consistent with quotes vs double quotes.
 * [x] DONE Hot reloading for styles isn't working. That's totally my bad, I knew this and took out the style loader hastily.
   When I change the `index.css` file, the styles should update in the app without a refresh. This is a basic feature
   for a realistic project.
