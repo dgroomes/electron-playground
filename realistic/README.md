@@ -59,7 +59,7 @@ Follow these instructions to build and run the app.
     maker).
 
 
-Rebuilding and re-installed `build-support` is a bit of a pain. Try this alias to make it easier:
+Rebuilding and re-installing `build-support` is a bit of a pain. Try this alias to make it easier:
 
 ```shell
 alias rbs='cd build-support && npm install && npm run build && npm pack && cd .. && npm install --save-dev ./build-support/electron-playground_realistic_build-support-1.0.0.tgz'
@@ -163,7 +163,7 @@ General clean-ups, TODOs and things I wish to implement for this project:
     * DONE Combine config
     * ABANDON (No this is too odd) Consider starting Electron Forge from the Node API instead of the CLI via start script. I'd like to get rid of the
       `forge.config.ts` file if possible. The project plugin is the monolithic entity, including config.
-* [x] DONE Drop the `WebpackConfig.ts` code and use my own webpack config (this is phase 2 of the overall custom plugin)
+* [ ] IN PROGRESS Drop the `WebpackConfig.ts` code and use my own webpack config (this is phase 2 of the overall custom plugin)
     * DONE Remove `@electron-forge/plugin-webpack` and wholesale copy over the needed code. I will gradually
       rewrite it.
     * DONE (it's not even used; maybe it was used for the native rebuilding which is something I also don't want) The AssetRelocatorPatch is a particularly nasty implementation detail. I don't really want to maintain it.
@@ -199,9 +199,10 @@ General clean-ups, TODOs and things I wish to implement for this project:
      * DONE Get rid of the config merging code. We don't want cascading behavior.
      * DONE Move basis of main process config closer to the config generation code
      * DONE Move renderer webpack config to the config generation code
-     * Combine the WebpackRenderConfigGenerator and WebpackMainConfigGenerator into one class. These classes have become
+     * IN PROGRESS Combine the WebpackRenderConfigGenerator and WebpackMainConfigGenerator into one class. These classes have become
        smaller now, and also the BuildSupportForgePlugin is now doing too much boilerplate work between the dev/prod and
        render/render-preload/main dimensions. Or, at least consider something.
+       * Rename WebpackMainConfigGenerator to just WebpackConfig. 
      * DONE Get rid of WebpackPluginConfig entirely.
 * [ ] What is ExternalsPlugin (used in the preload entrypoint)?
 * [ ] Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.

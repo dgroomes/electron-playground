@@ -8,7 +8,6 @@ import {
 } from "@electron-forge/shared-types";
 import {Configuration, Watching, webpack} from "webpack";
 import WebpackDevServer from "webpack-dev-server";
-import WebpackRendererConfigGenerator from "./WebpackRendererConfigGenerator";
 import * as console from "console";
 import * as path from "path";
 import {webpackRunPromisified, webpackWatchPromisified} from "./webpack-util";
@@ -43,15 +42,10 @@ export class BuildSupportForgePlugin extends PluginBase<null> {
     */
     #webpackOutputDir: string;
     #alreadyStarted: boolean = false;
-    #devMainConfig: Configuration;
-    #devRendererConfig: Configuration[];
-    #prodMainConfig: Configuration;
-    #prodRendererConfig: Configuration[];
+    #devConfig: WebpackMainConfigGenerator;
+    #prodConfig: WebpackMainConfigGenerator;
     #webpackWatching: Watching;
     readonly #port: number;
-    #devStrategy = new DevelopmentEnvStrategy();
-    #prodStrategy = new ProductionEnvStrategy();
-
     constructor() {
         super(null);
         this.#port = 3000;
@@ -67,16 +61,8 @@ export class BuildSupportForgePlugin extends PluginBase<null> {
     init(_dir: string, _config: ResolvedForgeConfig) {
         this.#rootDir = _dir;
         this.#webpackOutputDir = path.resolve(this.#rootDir, '.webpack');
-        const devMainConfigGenerator = new WebpackMainConfigGenerator(this.#rootDir, this.#devStrategy, this.#port);
-        const devRendererConfigGenerator = new WebpackRendererConfigGenerator(this.#rootDir, this.#devStrategy);
-        const prodMainConfigGenerator = new WebpackMainConfigGenerator(this.#rootDir, this.#prodStrategy, this.#port);
-        const prodRendererConfigGenerator = new WebpackRendererConfigGenerator(this.#rootDir, this.#prodStrategy);
-
-        this.#devMainConfig = devMainConfigGenerator.generateConfig();
-        this.#devRendererConfig = [devRendererConfigGenerator.generateNormalConfig(), devRendererConfigGenerator.generatePreloadConfig()];
-        this.#prodMainConfig = prodMainConfigGenerator.generateConfig();
-        this.#prodRendererConfig = [prodRendererConfigGenerator.generateNormalConfig(), prodRendererConfigGenerator.generatePreloadConfig()];
-
+        this.#devConfig = WebpackMainConfigGenerator.create(this.#rootDir, new DevelopmentEnvStrategy(), this.#port);
+        this.#prodConfig = WebpackMainConfigGenerator.create(this.#rootDir, new ProductionEnvStrategy(), this.#port);
         super.init(this.#rootDir, _config);
     }
 
@@ -95,7 +81,7 @@ export class BuildSupportForgePlugin extends PluginBase<null> {
     private async buildForProduction() {
         // Because there is no watching, and no dev servers involved, we can afford to express all webpack 'Configuration'
         // objects into the same webpack compiler object. Then, we just invoke the compiler once. We promisify the call.
-        const config = [this.#prodMainConfig, ...this.#prodRendererConfig]
+        const config = [this.#prodConfig.mainProcessConfig, this.#prodConfig.rendererProcessPreloadConfig, this.#prodConfig.rendererProcessNormalConfig];
         const compiler = webpack(config);
         const stats = await webpackRunPromisified(compiler);
         if (stats.hasErrors()) {
@@ -127,7 +113,7 @@ export class BuildSupportForgePlugin extends PluginBase<null> {
         this.#alreadyStarted = true;
 
         // Compile the main process bundles. The returned promise resolves when the compilation is complete.
-        const mainCompiler = webpack(this.#devMainConfig);
+        const mainCompiler = webpack(this.#devConfig.mainProcessConfig);
         const compileMainPromise = webpackWatchPromisified(mainCompiler).currentCompilation();
 
         const rendererServer = await this.rendererServer();
@@ -141,7 +127,7 @@ export class BuildSupportForgePlugin extends PluginBase<null> {
      *  Create and configure a webpack compiler and webpack-dev-server for the renderer process bundles.
      */
     private async rendererServer(): Promise<WebpackDevServer> {
-        const compiler = webpack(this.#devRendererConfig);
+        const compiler = webpack([this.#devConfig.rendererProcessPreloadConfig, this.#devConfig.rendererProcessNormalConfig]);
 
         const devServerConfig: WebpackDevServer.Configuration = {
             hot: true,
