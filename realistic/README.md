@@ -103,6 +103,16 @@ Follows these instructions to install and run React Developer Tools in standalon
 
 General clean-ups, TODOs and things I wish to implement for this project:
 
+* [ ] Maybe use something like trpc to talk between the main process and renderer process?
+* [ ] Custom icon (`.ico`). How do you create one? SVG?
+* [ ] What is ExternalsPlugin (used in the preload entrypoint)?
+* [ ] Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.
+* [ ] Go away from the `main_window` name because the overloading on the word main is actually extremely confusing, because
+  in Electron the there is the "main process".
+
+
+## Finished Wish List Items
+
 * [x] DONE Scaffold the app.
 * [x] DONE (working but crufty) Bundle (in prep for TypeScript). Probably use webpack because Electron and webpack are both part of the OpenJS Foundation. Seems
   like the right thing to do (even though I like esbuild).
@@ -127,8 +137,6 @@ General clean-ups, TODOs and things I wish to implement for this project:
     way: <https://github.com/electron/electron/issues/36545#issuecomment-1652665436>.
     * DONE Pass a flag somehow so that the `localhost:8097` script gets loaded.
 * [x] DONE Instructions for packaging and installing.
-* [ ] Maybe use something like trpc to talk between the main process and renderer process?
-* [ ] Custom icon (`.ico`). How do you create one? SVG?
 * [x] DONE Debug logging. Forge is not showing me any webpack logs. This is a problem because I want to develop my own Forge
   plugin that uses webpack, but I need the logging feedback so I can have a hope at learning webpack dev.
 * [x] DONE Drop Electron Forge's webpack plugin (phase 1). Try to make my own (we're still going to lean on Webpack heavily)
@@ -204,10 +212,6 @@ General clean-ups, TODOs and things I wish to implement for this project:
        render/render-preload/main dimensions. Or, at least consider something.
        * DONE Rename WebpackMainConfigGenerator to just WebpackConfig. 
      * DONE Get rid of WebpackPluginConfig entirely.
-* [ ] What is ExternalsPlugin (used in the preload entrypoint)?
-* [ ] Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.
-* [ ] Go away from the `main_window` name because the overloading on the word main is actually extremely confusing, because
-  in Electron the there is the "main process".
 * [x] DONE Format the whole project and be consistent with quotes vs double quotes.
 * [x] DONE Hot reloading for styles isn't working. That's totally my bad, I knew this and took out the style loader hastily.
   When I change the `index.css` file, the styles should update in the app without a refresh. This is a basic feature
