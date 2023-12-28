@@ -2,6 +2,7 @@ import path from "path";
 import {Configuration, DefinePlugin, ExternalsPlugin} from "webpack";
 import {EnvStrategy} from "./EnvStrategy";
 import HtmlWebpackPlugin from "html-webpack-plugin";
+import ReactDevToolsScriptAdderPlugin from "./ReactDevToolsScriptAdderPlugin";
 
 /**
  * Represents webpack configurations for the various Electron entry points: main process, renderer process, preload
@@ -174,10 +175,11 @@ class WebpackConfigGenerator {
         config.plugins = [
             new HtmlWebpackPlugin({
                 title: "main_window",
-                template: htmlEntrypoint(),
+                template: "./src/index.html",
                 filename: `main_window/index.html`,
                 chunks: ["main_window"],
-            })
+            }),
+            new ReactDevToolsScriptAdderPlugin()
         ];
 
         return config;
@@ -193,25 +195,5 @@ class WebpackConfigGenerator {
         config.plugins = [new ExternalsPlugin("commonjs2", externals)];
 
         return config;
-    }
-}
-
-/**
- * This is one piece in the puzzle of our integration to React Developer Tools. See the related note in the README.
- * We provide two different HTML entry points. One is the regular 'index.html' file, and the other is the same thing but
- * with the addition of a <script> tag that loads code from the external React Developer Tools instance/server.
- *
- * I don't like the duplication in the two HTML files, but at least it is understandable. I would rather inject the <script>
- * tag conditionally using a template snippet (thanks to the 'html-webpack-plugin' plugin) but unfortunately Electron Forge
- * does not have an extension point to the `new HtmlWebpackPlugin()` call where we would pass a flag. See these related
- * links:
- *   - https://github.com/electron/forge/blob/b4f6dd9f8da7ba63099e4b802c59d1f56feca0cc/packages/plugin/webpack/src/WebpackConfig.ts#L269
- *   - https://github.com/electron/forge/issues/2968
- */
-function htmlEntrypoint(): string {
-    if (process.env.ELECTRON_PLAYGROUND_CONNECT_TO_REACT_DEVTOOLS === "true") {
-        return "./src/index_connect_react_devtools.html";
-    } else {
-        return "./src/index.html";
     }
 }
