@@ -106,7 +106,7 @@ General clean-ups, TODOs and things I wish to implement for this project:
 * [ ] Maybe use something like trpc to talk between the main process and renderer process?
 * [ ] Custom icon (`.ico`). How do you create one? SVG?
 * [ ] What is ExternalsPlugin (used in the preload entrypoint)?
-* [ ] Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.
+* [x] DONE Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.
 * [ ] Go away from the `main_window` name because the overloading on the word main is actually extremely confusing, because
   in Electron the there is the "main process".
 
