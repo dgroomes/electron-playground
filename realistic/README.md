@@ -109,6 +109,8 @@ General clean-ups, TODOs and things I wish to implement for this project:
 * [x] DONE Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.
 * [ ] Go away from the `main_window` name because the overloading on the word main is actually extremely confusing, because
   in Electron the there is the "main process".
+* [ ] Clarify the code that deals with paths. This is the tricky code like ``\`file://$\{require('path').resolve(__dirname, '..', '${'renderer'}', '${entryPointName}', '${basename}')}\``;``
+  that has so much escaping I can't make sense of it.
 
 
 ## Finished Wish List Items
