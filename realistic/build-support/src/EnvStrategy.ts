@@ -1,4 +1,4 @@
-import { Configuration } from "webpack";
+import {Configuration} from "webpack";
 import path from "path";
 
 /**
@@ -6,8 +6,11 @@ import path from "path";
  */
 export interface EnvStrategy {
     mode(): Configuration["mode"];
+
     publicPath(): Configuration["output"]["publicPath"];
+
     rendererPreloadEntryPoint(webpackOutputDir: string, entryPointName: string): string;
+
     rendererEntryPoint(entryPointName: string, basename: string, port: number): string;
 }
 
@@ -45,7 +48,7 @@ export class DevelopmentEnvStrategy implements EnvStrategy {
 
     rendererEntryPoint(entryPointName: string, basename: string, port: number): string {
         const baseUrl = `http://localhost:${port}/${entryPointName}`;
-        if (basename !== 'index.html') {
+        if (basename !== "index.html") {
             return `'${baseUrl}/${basename}'`;
         }
         return `'${baseUrl}'`;
