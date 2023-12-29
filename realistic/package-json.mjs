@@ -25,7 +25,6 @@ const versions = {
     react: "^18.2.0", // React releases: https://legacy.reactjs.org/versions
     reactTypes: "^18.2.37", // @types/react releases: https://www.npmjs.com/package/@types/react
     reactDomTypes: "^18.2.15", // @types/react-dom releases: https://www.npmjs.com/package/@types/react-dom
-    electronDevtoolsInstaller: "^3.2.0", // Electron DevTools Installer releases: https://github.com/MarshallOfSound/electron-devtools-installer/releases
     cssLoader: "^6.8.1", // css-loader releases: https://github.com/webpack-contrib/css-loader/releases
     styleLoader: "^3.3.3", // style-loader releases: https://github.com/webpack-contrib/style-loader/releases
 };
@@ -138,11 +137,6 @@ generatePackageJson("build-support", false, {
         "html-webpack-plugin": versions.htmlWebpackPlugin,
         "ts-loader": versions.tsLoader,
         "css-loader": versions.cssLoader,
-        "style-loader": versions.styleLoader,
-
-        // We want DevTools available to us during development time. There is not a first-party Electron package for
-        // doing automatically, but the Electron docs (https://www.electronjs.org/docs/latest/tutorial/devtools-extension)
-        //  reference a useful third-party solution: https://github.com/MarshallOfSound/electron-devtools-installer
-        "electron-devtools-installer": versions.electronDevtoolsInstaller,
+        "style-loader": versions.styleLoader
     },
 });
