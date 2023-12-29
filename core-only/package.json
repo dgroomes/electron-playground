@@ -2,21 +2,11 @@
   "name": "electron-playground_core-only",
   "version": "1.0.0",
   "description": "A simple Electron app that showcases core APIs and nothing else.",
-  "main": "src/index.js",
+  "main": "main.js",
   "devDependencies": {
-    "electron": "^27.0.3"
+    "electron": "^28.1.0"
   },
   "scripts": {
-    "start": "electron src/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/dgroomes/electron-playground.git"
-  },
-  "keywords": [
-    "electron"
-  ],
-  "author": "David Groomes",
-  "license": "UNLICENSED",
-  "homepage": "https://github.com/dgroomes/electron-playground"
+    "start": "electron ."
+  }
 }

@@ -6,10 +6,10 @@ A simple Electron app that showcases core APIs and nothing else.
 ## Overview
 
 This is a simple Electron app I use as a working example for my own reference about core Electron APIs and concepts. For
-example, it showcases the concepts of the *main* process, the *renderer* process and the *preload script*. By contrast,
-it does not feature incidental complexity like a TypeScrip compilation step, a bundle step, or even testing. These things
-are important for a production codebase, but this is a learning-style codebase. Stay focused. It is adapted from the
-official Electron quick-start app <https://github.com/electron/electron-quick-start>.
+example, it showcases the concepts of the *main* process, a *renderer* process and a *preload script*. By contrast,
+it does not feature incidental complexity like a TypeScript compilation step, a bundle step, or even testing. These things
+are important for a production codebase, but this is a learning-style codebase. It is adapted from the official Electron
+quick-start app <https://github.com/electron/electron-quick-start>.
 
 
 ## Instructions
