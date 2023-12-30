@@ -110,11 +110,19 @@ General clean-ups, TODOs and things I wish to implement for this project:
    * DONE I can tell that it does actually create a smaller bundle, but I still don't get it. I want to do something with code
      from "timers" and we'll see what happens.
 * [x] DONE Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.
-* [ ] Go away from the `main_window` name because the overloading on the word main is actually extremely confusing, because
-  in Electron the there is the "main process".
-* [ ] Clarify the code that deals with paths. This is the tricky code like ``\`file://$\{require('path').resolve(__dirname, '..', '${'renderer'}', '${entryPointName}', '${basename}')}\``;``
+* [ ] SKIP (It's annoying, but it's a convention. Similar conflation with the word "index" and "app") Go away from the `main_window` name because the overloading on the word main is actually extremely confusing, because
+  in Electron there is the "main process".
+* [x] DONE Clarify the code that deals with paths. This is the tricky code like ``\`file://$\{require('path').resolve(__dirname, '..', '${'renderer'}', '${entryPointName}', '${basename}')}\``;``
   that has so much escaping I can't make sense of it.
-
+   * SKIP (I like the idea and it would work with webpack aliases but there's not enough content there to make it worth it) Maybe just don't have multiple layers of escaping. The thing I need is to dispatch differently in dev vs prod. I
+     could have the strategy classes in the real source code and then use a "defines" only to indicate if we're in dev
+     or prod via a simple string. This is the least fancy but it's a bit annoying because we're polluting a production
+     artifact. Or, webpack is already in the mix so I could bundle the strategy code via a requires, and just use a
+     different requires path (via "defines" again)? This reminds of Android build variants and flavors.   
+   * Can we just use relative paths instead of the `path` stuff?
+* [ ] How does logging work from the main process? Where does it go? Well, maybe this would "just work" if I was using
+  the DMG maker instead of the ZIP maker. So just wait for that to work again.
+* [ ] Revisit EnvStrategy one more time.
 
 ## Finished Wish List Items
 

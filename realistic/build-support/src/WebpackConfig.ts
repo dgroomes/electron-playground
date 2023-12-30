@@ -40,7 +40,7 @@ class WebpackConfigGenerator {
 
     public generateMainProcessConfig() {
         const config: Configuration = this.mainProcessConfigBasis();
-        this.customizeForEnvironment(config);
+        this.customizeMainProcessConfigForEnvironment(config);
         return config;
     }
 
@@ -83,17 +83,15 @@ class WebpackConfigGenerator {
     /**
      * Customize the given configuration with properties that depend on the environment.
      */
-    private customizeForEnvironment(config: Configuration) {
+    private customizeMainProcessConfigForEnvironment(config: Configuration) {
         config.entry = path.resolve(this.#projectDir, "./src/main.ts");
         config.output.path = path.resolve(this.#webpackOutputDir, "main");
         config.mode = this.#envStrategy.mode();
-        const entryPoint = this.#envStrategy.rendererEntryPoint("main_window", "index.html", this.#port);
-        const preloadEntryPoint = this.#envStrategy.rendererPreloadEntryPoint(this.#webpackOutputDir, "main_window")
+        const entryPoint = this.#envStrategy.rendererEntryPoint(this.#port);
+        const preloadEntryPoint = this.#envStrategy.rendererPreloadEntryPoint(this.#webpackOutputDir)
         const definitions = {
             "MAIN_WINDOW_WEBPACK_ENTRY": entryPoint,
-            "process.env.MAIN_WINDOW_WEBPACK_ENTRY": entryPoint,
             "MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY": preloadEntryPoint,
-            "process.env.MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY": preloadEntryPoint
         }
         config.plugins = [new DefinePlugin(definitions)];
     }
