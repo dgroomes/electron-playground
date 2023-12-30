@@ -1,6 +1,6 @@
 import path from "path";
 import {Configuration, DefinePlugin, ExternalsPlugin} from "webpack";
-import {EnvStrategy} from "./EnvStrategy";
+import {BuildSupportEnvStrategy} from "./BuildSupportEnvStrategy";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import ReactDevToolsScriptAdderPlugin from "./ReactDevToolsScriptAdderPlugin";
 
@@ -8,16 +8,16 @@ import ReactDevToolsScriptAdderPlugin from "./ReactDevToolsScriptAdderPlugin";
  * Represents webpack configurations for the various Electron entry points: main process, renderer process, preload
  * scripts.
  */
-export class WebpackConfig {
+export class BuildSupportWebpackConfig {
 
     constructor(public readonly mainProcessConfig: Configuration,
                 public readonly rendererProcessNormalConfig: Configuration,
                 public readonly rendererProcessPreloadConfig: Configuration) {
     }
 
-    static create(projectDir: string, envStrategy: EnvStrategy, port: number): WebpackConfig {
-        const generator = new WebpackConfigGenerator(projectDir, envStrategy, port);
-        return new WebpackConfig(
+    static create(projectDir: string, envStrategy: BuildSupportEnvStrategy): BuildSupportWebpackConfig {
+        const generator = new WebpackConfigGenerator(projectDir, envStrategy);
+        return new BuildSupportWebpackConfig(
             generator.generateMainProcessConfig(),
             generator.generateRendererProcessNormalConfig(),
             generator.generateRendererProcessPreloadConfig());
@@ -27,15 +27,13 @@ export class WebpackConfig {
 class WebpackConfigGenerator {
 
     readonly #webpackOutputDir: string;
-    readonly #envStrategy: EnvStrategy;
+    readonly #envStrategy: BuildSupportEnvStrategy;
     readonly #projectDir: string;
-    readonly #port: number;
 
-    constructor(projectDir: string, envStrategy: EnvStrategy, port: number) {
+    constructor(projectDir: string, envStrategy: BuildSupportEnvStrategy) {
         this.#webpackOutputDir = path.resolve(projectDir, ".webpack");
         this.#envStrategy = envStrategy;
         this.#projectDir = projectDir;
-        this.#port = port;
     }
 
     public generateMainProcessConfig() {
@@ -87,8 +85,8 @@ class WebpackConfigGenerator {
         config.entry = path.resolve(this.#projectDir, "./src/main.ts");
         config.output.path = path.resolve(this.#webpackOutputDir, "main");
         config.mode = this.#envStrategy.mode();
-        const entryPoint = this.#envStrategy.rendererEntryPoint(this.#port);
-        const preloadEntryPoint = this.#envStrategy.rendererPreloadEntryPoint(this.#webpackOutputDir)
+        const entryPoint = this.#envStrategy.rendererEntryPoint();
+        const preloadEntryPoint = this.#envStrategy.rendererPreloadEntryPoint(this.#webpackOutputDir);
         const definitions = {
             "MAIN_WINDOW_WEBPACK_ENTRY": entryPoint,
             "MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY": preloadEntryPoint,

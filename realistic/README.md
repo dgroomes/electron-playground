@@ -122,7 +122,7 @@ General clean-ups, TODOs and things I wish to implement for this project:
    * Can we just use relative paths instead of the `path` stuff?
 * [ ] How does logging work from the main process? Where does it go? Well, maybe this would "just work" if I was using
   the DMG maker instead of the ZIP maker. So just wait for that to work again.
-* [ ] Revisit EnvStrategy one more time.
+* [x] DONE Revisit EnvStrategy one more time.
 
 ## Finished Wish List Items
 

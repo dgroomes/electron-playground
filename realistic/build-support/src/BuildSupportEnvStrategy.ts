@@ -4,17 +4,17 @@ import path from "path";
 /**
  * Encapsulate environment-specific configuration.
  */
-export interface EnvStrategy {
+export interface BuildSupportEnvStrategy {
     mode(): Configuration["mode"];
 
     publicPath(): Configuration["output"]["publicPath"];
 
     rendererPreloadEntryPoint(webpackOutputDir: string): string;
 
-    rendererEntryPoint(port: number): string;
+    rendererEntryPoint(): string;
 }
 
-export class ProductionEnvStrategy implements EnvStrategy {
+export class ProductionEnvStrategy implements BuildSupportEnvStrategy {
     mode(): Configuration["mode"] {
         return "production";
     }
@@ -27,12 +27,19 @@ export class ProductionEnvStrategy implements EnvStrategy {
         return "require('path').resolve(__dirname, '../renderer/main_window/preload.js')";
     }
 
-    rendererEntryPoint(_port: number): string {
+    rendererEntryPoint(): string {
         return "`file://${require('path').resolve(__dirname, '../renderer/main_window/index.html')}`";
     }
 }
 
-export class DevelopmentEnvStrategy implements EnvStrategy {
+export class DevelopmentEnvStrategy implements BuildSupportEnvStrategy {
+
+    readonly #port: number;
+
+    constructor(port: number) {
+        this.#port = port;
+    }
+
     mode(): Configuration["mode"] {
         return "development";
     }
@@ -45,7 +52,7 @@ export class DevelopmentEnvStrategy implements EnvStrategy {
         return JSON.stringify(path.resolve(webpackOutputDir, 'renderer/main_window/preload.js'));
     }
 
-    rendererEntryPoint(port: number): string {
-        return JSON.stringify(`http://localhost:${port}/main_window`);
+    rendererEntryPoint(): string {
+        return JSON.stringify(`http://localhost:${this.#port}/main_window`);
     }
 }
