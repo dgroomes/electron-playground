@@ -186,13 +186,20 @@ class WebpackConfigGenerator {
     }
 
     public generateRendererProcessPreloadConfig() {
-        const externals = ["electron", "electron/renderer", "electron/common", "events", "timers", "url"];
         const config = this.rendererProcessConfigBasis();
         this.customizeRendererProcessConfigForEnvironment(config);
 
         config.entry = {["main_window"]: "./src/preload.ts"};
         config.output.filename = "[name]/preload.js";
-        config.plugins = [new ExternalsPlugin("commonjs2", externals)];
+
+        // Electron provides certain APIs in the runtime environment. We need to let webpack know about these APIs so
+        // that webpack doesn't try to bundle them. If we let webpack attempt to bundle these APIs, then it will
+        // successfully "bundle up some source code" for some of them, but for others it will bundle up a "new Error("Can't find module 'xyz'")"
+        // expression for other cases. It totally makes sense that this is necessary, but it's not at all clear what
+        // these APIs (or loosely "modules") are. The Electron docs enumerate some names when it comes to preload scripts
+        // (see https://www.electronjs.org/docs/latest/tutorial/sandbox#preload-scripts) and better yet the Electron Forge
+        // source code enumerates some specific names (see https://github.com/electron/forge/blob/main/packages/plugin/webpack/src/WebpackConfig.ts#L310).
+        config.plugins = [new ExternalsPlugin("commonjs2", ["electron", "electron/renderer", "electron/common", "events", "timers", "url"])];
 
         return config;
     }

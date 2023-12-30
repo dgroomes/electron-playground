@@ -105,7 +105,10 @@ General clean-ups, TODOs and things I wish to implement for this project:
 
 * [ ] Maybe use something like trpc to talk between the main process and renderer process?
 * [ ] Custom icon (`.ico`). How do you create one? SVG?
-* [ ] What is ExternalsPlugin (used in the preload entrypoint)?
+* [x] DONE (Ok I kind of get it but don't want to go much further; docs aren't quite there so it would be a rabbit hole) What is ExternalsPlugin (used in the preload entrypoint)?
+   * See <https://www.electronjs.org/docs/latest/tutorial/sandbox#preload-scripts>.
+   * DONE I can tell that it does actually create a smaller bundle, but I still don't get it. I want to do something with code
+     from "timers" and we'll see what happens.
 * [x] DONE Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.
 * [ ] Go away from the `main_window` name because the overloading on the word main is actually extremely confusing, because
   in Electron the there is the "main process".
