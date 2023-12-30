@@ -105,24 +105,9 @@ General clean-ups, TODOs and things I wish to implement for this project:
 
 * [ ] Maybe use something like trpc to talk between the main process and renderer process?
 * [ ] Custom icon (`.ico`). How do you create one? SVG?
-* [x] DONE (Ok I kind of get it but don't want to go much further; docs aren't quite there so it would be a rabbit hole) What is ExternalsPlugin (used in the preload entrypoint)?
-   * See <https://www.electronjs.org/docs/latest/tutorial/sandbox#preload-scripts>.
-   * DONE I can tell that it does actually create a smaller bundle, but I still don't get it. I want to do something with code
-     from "timers" and we'll see what happens.
-* [x] DONE Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.
-* [ ] SKIP (It's annoying, but it's a convention. Similar conflation with the word "index" and "app") Go away from the `main_window` name because the overloading on the word main is actually extremely confusing, because
-  in Electron there is the "main process".
-* [x] DONE Clarify the code that deals with paths. This is the tricky code like ``\`file://$\{require('path').resolve(__dirname, '..', '${'renderer'}', '${entryPointName}', '${basename}')}\``;``
-  that has so much escaping I can't make sense of it.
-   * SKIP (I like the idea and it would work with webpack aliases but there's not enough content there to make it worth it) Maybe just don't have multiple layers of escaping. The thing I need is to dispatch differently in dev vs prod. I
-     could have the strategy classes in the real source code and then use a "defines" only to indicate if we're in dev
-     or prod via a simple string. This is the least fancy but it's a bit annoying because we're polluting a production
-     artifact. Or, webpack is already in the mix so I could bundle the strategy code via a requires, and just use a
-     different requires path (via "defines" again)? This reminds of Android build variants and flavors.   
-   * Can we just use relative paths instead of the `path` stuff?
 * [ ] How does logging work from the main process? Where does it go? Well, maybe this would "just work" if I was using
   the DMG maker instead of the ZIP maker. So just wait for that to work again.
-* [x] DONE Revisit EnvStrategy one more time.
+
 
 ## Finished Wish List Items
 
@@ -243,6 +228,22 @@ General clean-ups, TODOs and things I wish to implement for this project:
   and follow the links). The Electron Forge templates don't even use the DMG maker so I don't have a strong foundation
   to work from here (the templates support some other makers, which is perfectly reasonable: see <https://github.com/electron/forge/blob/335c388278caa339cdcb253516f1b08d7596cf1d/packages/template/webpack-typescript/package.json#L26>).
   So, we won't outrun official (and "stable") support. Stick to ZIP.
+* [x] DONE (Ok I kind of get it but don't want to go much further; docs aren't quite there so it would be a rabbit hole) What is ExternalsPlugin (used in the preload entrypoint)?
+    * See <https://www.electronjs.org/docs/latest/tutorial/sandbox#preload-scripts>.
+    * DONE I can tell that it does actually create a smaller bundle, but I still don't get it. I want to do something with code
+      from "timers" and we'll see what happens.
+* [x] DONE Configure `HtmlWebpackPlugin` to support the "with React Dev Tools" or without.
+* [ ] SKIP (It's annoying, but it's a convention. Similar conflation with the word "index" and "app") Go away from the `main_window` name because the overloading on the word main is actually extremely confusing, because
+  in Electron there is the "main process".
+* [x] DONE Clarify the code that deals with paths. This is the tricky code like ``\`file://$\{require('path').resolve(__dirname, '..', '${'renderer'}', '${entryPointName}', '${basename}')}\``;``
+  that has so much escaping I can't make sense of it.
+    * SKIP (I like the idea and it would work with webpack aliases but there's not enough content there to make it worth it) Maybe just don't have multiple layers of escaping. The thing I need is to dispatch differently in dev vs prod. I
+      could have the strategy classes in the real source code and then use a "defines" only to indicate if we're in dev
+      or prod via a simple string. This is the least fancy but it's a bit annoying because we're polluting a production
+      artifact. Or, webpack is already in the mix so I could bundle the strategy code via a requires, and just use a
+      different requires path (via "defines" again)? This reminds of Android build variants and flavors.
+    * Can we just use relative paths instead of the `path` stuff?
+* [x] DONE Revisit EnvStrategy one more time.
 
 
 ## Reference
