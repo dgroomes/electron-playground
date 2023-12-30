@@ -94,7 +94,7 @@ General clean-ups, TODOs and things I wish to implement for this project:
 
 * [ ] Maybe use something like trpc to talk between the main process and renderer process?
 * [ ] Custom icon (`.ico`). How do you create one? SVG?
-* [ ] How does logging work from the main process? Where does it go? Well, maybe this would "just work" if I was using
+* [x] Abandoned (So difficult, as I already know. I could not get the plist trick to work to write stdout/err to a file. But if run the binary directory instead of using `open`, then I'll see logs in the shell. Fine.) How does logging work from the main process? Where does it go? Well, maybe this would "just work" if I was using
   the DMG maker instead of the ZIP maker. So just wait for that to work again.
 * [x] DONE (weird the problem went away; even when I blow away node_modules which is what was giving me falso negative last time) Try to add back the DMG maker using a workaround. 
 

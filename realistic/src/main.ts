@@ -6,6 +6,8 @@ import {app, BrowserWindow} from "electron";
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
+console.log("Hello from main.ts!");
+
 app.on("ready", async function onReady() {
     // Create the browser window.
     const mainWindow = new BrowserWindow({
