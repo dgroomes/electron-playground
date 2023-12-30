@@ -132,7 +132,7 @@ generatePackageJson("build-support", false, {
     dependencies: {
         electron: versions.electron,
         "@electron-forge/cli": versions.electronForge,
-        "@electron-forge/maker-zip": versions.electronForge,
+        "@electron-forge/maker-dmg": versions.electronForge,
         "webpack-dev-server": versions.webpackDevServer,
         "html-webpack-plugin": versions.htmlWebpackPlugin,
         "ts-loader": versions.tsLoader,

@@ -52,18 +52,7 @@ Follow these instructions to build and run the app.
     * ```shell
       npm run make
       ```
-  * You will then need to find the `.zip` file in the `out` directory, unzip it and place it in your `Applications`.
-    This step is hardly useful because the Electron Forge `package` step already did most of the work. We might as well
-    have just zipped it up from a shell script. But, this step serves as a placeholder and reminder for us to replace it
-    with a proper DMG-making step (see the note in the "Wish List" section below about the current defect with the DMG
-    maker).
-
-
-Rebuilding and re-installing `build-support` is a bit of a pain. Try this alias to make it easier:
-
-```shell
-alias rbs='cd build-support && npm install && npm run build && npm pack && cd .. && npm install --save-dev ./build-support/electron-playground_realistic_build-support-1.0.0.tgz'
-```
+  * You will then need to find the `.dmg` file in the `out` directory and install it.
 
 
 ## Instructions for React DevTools
@@ -107,6 +96,7 @@ General clean-ups, TODOs and things I wish to implement for this project:
 * [ ] Custom icon (`.ico`). How do you create one? SVG?
 * [ ] How does logging work from the main process? Where does it go? Well, maybe this would "just work" if I was using
   the DMG maker instead of the ZIP maker. So just wait for that to work again.
+* [x] DONE (weird the problem went away; even when I blow away node_modules which is what was giving me falso negative last time) Try to add back the DMG maker using a workaround. 
 
 
 ## Finished Wish List Items

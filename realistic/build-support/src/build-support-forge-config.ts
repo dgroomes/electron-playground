@@ -1,5 +1,5 @@
 import type {ForgeConfig} from "@electron-forge/shared-types";
-import {MakerZIP} from "@electron-forge/maker-zip";
+import {MakerDMG} from "@electron-forge/maker-dmg";
 import {BuildSupportForgePlugin} from "./BuildSupportForgePlugin";
 
 const config: ForgeConfig = {
@@ -41,7 +41,18 @@ const config: ForgeConfig = {
         }
     },
     rebuildConfig: {},
-    makers: [new MakerZIP({}, ["darwin"])],
+    makers: [new MakerDMG({
+        // This is an odd one. The name of the application, in general, is whatever the value of the 'name' field is in
+        // 'package.json'. That's good and that's what I want. But when it comes to creating the '.dmg' file, the name
+        // is so long that it's causing a problem. 'electron-playground_realistic' is 29 characters but this string is
+        // used as a macOS "Volume" I guess, and there's a 27-character limit there. I was getting the following error
+        // message
+        //
+        //    electron forge AssertionError [ERR_ASSERTION]: Volume name is not longer than 27 chars
+        //
+        // So I have to come up with a shorter name here. 'electron-realistic' is only 18 characters, which works.
+        name: "electron-realistic"
+    })],
     plugins: [
         new BuildSupportForgePlugin(),
     ],
