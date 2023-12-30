@@ -14,9 +14,7 @@ app.whenReady().then(async () => {
 
     let options = {
         webPreferences: {
-            preload: preloadScript,
-            contextIsolation: true,
-            nodeIntegration: true
+            preload: preloadScript
         }
     };
 

@@ -5,28 +5,27 @@ environment.
 */
 
 /**
- * When the DOM is loaded paint the environmental version information.
+ * When the DOM is loaded, call the special "environmentInformation" function exposed by the preload script and write
+ * the information to the DOM.
  */
 window.addEventListener("DOMContentLoaded", () => {
+    let info = window.environmentInformation();
+
     {
         let element = document.getElementById("chrome-version");
-        let version = window.detectVersions.chromeVersion;
+        let version = info.chromeVersion;
         element.innerText = `Version: ${version}`;
     }
 
     {
         let element = document.getElementById("node-version");
-        let version = window.detectVersions.nodeVersion;
+        let version = info.nodeVersion;
         element.innerText = `Version: ${version}`;
     }
 
     {
         let element = document.getElementById("electron-version");
-        let version = window.detectVersions.electronVersion;
+        let version = info.electronVersion;
         element.innerText = `Version: ${version}`;
     }
-});
-
-window.messagePassing.registerCallbackForMessages( (message) => {
-    console.log(`Received a message: ${message}`);
 });
