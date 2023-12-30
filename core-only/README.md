@@ -49,7 +49,7 @@ General clean-ups, TODOs and things I wish to implement for this project:
   build/bundle step or even downloading any dependencies (nice!)
 * [ ] (Consider waiting a long while before doing this. Even the Electron docs are still using CommonJS). Upgrade to ESM instead of CommonJS once Electron 28 is released (this long-awaited feature was implemented in 28
   is available in beta).
-* [ ] How does Electron serve content to the webpage? Does it just serve everything under the "path" directory that it
+* [x] IN PROGRESS (Answer: everything is available by default) How does Electron serve content to the webpage? Does it just serve everything under the "path" directory that it
   was invoked with? Can you reference files outside this directory with something like `../secret-file.txt`? The `--help`
   docs on the `electron` command are sparse and I don't see anything obvious in the Electron docs. This is something I've
   [explored before](https://github.com/dgroomes/electron-playground/commit/b34aa11329e6178d7d781e06bd8339fffc36d01b#diff-8f2e8f513699eefdf6bc04ce722de524671ac8a7a90c07a8e2cf199d51183043R50)

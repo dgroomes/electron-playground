@@ -28,4 +28,14 @@ window.addEventListener("DOMContentLoaded", () => {
         let version = info.electronVersion;
         element.innerText = `Version: ${version}`;
     }
+
+    // I'm a bit surprised by this, but I guess with the default Electron settings, the web page can read any file on your
+    // filesystem that the Electron process has access to. Here, we're reading the README.md file in the root of the
+    // project, which is up one directory level from where the 'electron' command was executed. I think you're supposed
+    // to reach for a custom protocol handler to limit this but before doing that I'd like to find some docs (or the code)
+    // that explains or implements the default behavior.
+    fetch('../README.md')
+        .then(response => response.text())
+        .then(data => console.log(data))
+        .catch(error => console.error(error));
 });
