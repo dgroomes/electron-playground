@@ -1,5 +1,6 @@
 import {Configuration} from "webpack";
 import path from "path";
+import * as url from "url";
 
 /**
  * Encapsulate environment-specific configuration.
@@ -28,7 +29,7 @@ export class ProductionEnvStrategy implements BuildSupportEnvStrategy {
     }
 
     rendererEntryPoint(): string {
-        return "`file://${require('path').resolve(__dirname, '../renderer/main_window/index.html')}`";
+        return "require('url').pathToFileURL(require('path').resolve(__dirname, '../renderer/main_window/index.html')).toString()";
     }
 }
 
@@ -49,10 +50,16 @@ export class DevelopmentEnvStrategy implements BuildSupportEnvStrategy {
     }
 
     rendererPreloadEntryPoint(webpackOutputDir: string): string {
-        return JSON.stringify(path.resolve(webpackOutputDir, 'renderer/main_window/preload.js'));
+        return JSON.stringify(path.resolve(webpackOutputDir, "renderer/main_window/preload.js"));
     }
 
     rendererEntryPoint(): string {
-        return JSON.stringify(`http://localhost:${this.#port}/main_window`);
+        const entryPointUrl = url.format({
+            protocol: "http",
+            hostname: "localhost",
+            port: this.#port,
+            pathname: "main_window"
+        });
+        return JSON.stringify(entryPointUrl);
     }
 }
