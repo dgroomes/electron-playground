@@ -10,16 +10,16 @@
     "build": "tsc"
   },
   "devDependencies": {
-    "typescript": "^5.2"
+    "typescript": "~5.3"
   },
   "dependencies": {
-    "electron": "^27.0.4",
-    "@electron-forge/cli": "^6.4.2",
-    "@electron-forge/maker-dmg": "^6.4.2",
-    "webpack-dev-server": "^4.15.1",
-    "html-webpack-plugin": "^5.5.3",
-    "ts-loader": "^9.5.0",
-    "css-loader": "^6.8.1",
-    "style-loader": "^3.3.3"
+    "electron": "~28.1.0",
+    "@electron-forge/cli": "~6.4.2",
+    "@electron-forge/maker-dmg": "~6.4.2",
+    "webpack-dev-server": "~4.15.1",
+    "html-webpack-plugin": "~5.6.0",
+    "ts-loader": "~9.5.1",
+    "css-loader": "~6.8.1",
+    "style-loader": "~3.3.3"
   }
 }
