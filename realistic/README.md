@@ -104,7 +104,7 @@ General clean-ups, TODOs and things I wish to implement for this project:
   the DMG maker instead of the ZIP maker. So just wait for that to work again.
 * [x] DONE (weird the problem went away; even when I blow away node_modules which is what was giving me falso negative last time) Try to add back the DMG maker using a workaround. 
 * [x] DONE Revisit pathing stuff one more time. A little less eval.
-* [ ] IN PROGRESS Upgrade version. I know the upgrade to Electron Forge 7.x will fail unfortunately so need to figure that out.
+* [x] DONE Upgrade version. I know the upgrade to Electron Forge 7.x will fail unfortunately so need to figure that out.
 
 
 ## Finished Wish List Items

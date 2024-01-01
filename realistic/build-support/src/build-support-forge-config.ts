@@ -2,7 +2,8 @@ import type {ForgeConfig} from "@electron-forge/shared-types";
 import {MakerDMG} from "@electron-forge/maker-dmg";
 import {BuildSupportForgePlugin} from "./BuildSupportForgePlugin";
 
-const config: ForgeConfig = {
+// noinspection JSUnusedGlobalSymbols
+export const forgeConfig: ForgeConfig = {
     packagerConfig: {
 
         /*
@@ -57,6 +58,3 @@ const config: ForgeConfig = {
         new BuildSupportForgePlugin(),
     ],
 };
-
-// noinspection JSUnusedGlobalSymbols
-export default config;
