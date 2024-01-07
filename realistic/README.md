@@ -98,7 +98,7 @@ Follows these instructions to install and run React Developer Tools in standalon
 
 General clean-ups, TODOs and things I wish to implement for this project:
 
-* [ ] Maybe use something like trpc to talk between the main process and renderer process?
+* [ ] Use Electron's `ipcMain` and `ipcRenderer` to talk between the main process and renderer process?
 * [ ] Custom icon (`.ico`). How do you create one? SVG?
 * [x] DONE (UPDATE #2: Ok I'm happy enough to just redefine `process.stdout.write` and `process.stderr.write` to write to a file. This in combo with detecting a teletype and Electron's convenient `app.getPath("logs)` is pretty nice) (So difficult, as I already know. I could not get the plist trick to work to write stdout/err to a file. But if run the binary directory instead of using `open`, then I'll see logs in the shell. Fine.) How does logging work from the main process? Where does it go? Well, maybe this would "just work" if I was using
   the DMG maker instead of the ZIP maker. So just wait for that to work again.
@@ -242,6 +242,8 @@ General clean-ups, TODOs and things I wish to implement for this project:
       different requires path (via "defines" again)? This reminds of Android build variants and flavors.
     * Can we just use relative paths instead of the `path` stuff?
 * [x] DONE Revisit EnvStrategy one more time.
+* [ ] Try out the alias/resolve idea described in the "Clarify the code that deals with paths" item above. I got this to
+  work nicely in my [`webpack-playground` repository](https://github.com/dgroomes/webpack-playground/commit/6eec8ac75ac5c2647e6e953517b4184c43bb8027).
 
 
 ## Reference
