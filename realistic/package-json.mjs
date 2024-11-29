@@ -16,17 +16,17 @@ maintainability, especially for people who are new to the project (or me returni
 import fs from "fs";
 
 const versions = {
-    typescript: "~5.3", // TypeScript releases: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-3.html
-    electron: "~28.1.0", // Electron releases: https://releases.electronjs.org/releases/stable
-    electronForge: "~7.2.0", // Electron Forge releases: https://github.com/electron/forge/releases
+    typescript: "~5.7", // TypeScript releases: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-3.html
+    electron: "~33.2.1", // Electron releases: https://releases.electronjs.org/releases/stable
+    electronForge: "~7.6.0", // Electron Forge releases: https://github.com/electron/forge/releases
     tsLoader: "~9.5.1", // ts-loader releases: https://github.com/TypeStrong/ts-loader/releases
-    webpackDevServer: "~4.15.1", // webpack-dev-server releases: https://github.com/webpack/webpack-dev-server/releases/tag/v4.15.1
-    htmlWebpackPlugin: "~5.6.0", // html-webpack-plugin releases: https://github.com/jantimon/html-webpack-plugin/blob/main/CHANGELOG.md
+    webpackDevServer: "~5.1.0", // webpack-dev-server releases: https://github.com/webpack/webpack-dev-server/releases
+    htmlWebpackPlugin: "~5.6.3", // html-webpack-plugin releases: https://github.com/jantimon/html-webpack-plugin/blob/main/CHANGELOG.md
     react: "~18.2.0", // React releases: https://legacy.reactjs.org/versions
-    reactTypes: "~18.2.46", // @types/react releases: https://www.npmjs.com/package/@types/react?activeTab=versions
-    reactDomTypes: "~18.2.18", // @types/react-dom releases: https://www.npmjs.com/package/@types/react-dom?activeTab=versions
-    cssLoader: "~6.8.1", // css-loader releases: https://github.com/webpack-contrib/css-loader/releases
-    styleLoader: "~3.3.3", // style-loader releases: https://github.com/webpack-contrib/style-loader/releases
+    reactTypes: "~18.3.12", // @types/react releases: https://www.npmjs.com/package/@types/react?activeTab=versions
+    reactDomTypes: "~18.3.1", // @types/react-dom releases: https://www.npmjs.com/package/@types/react-dom?activeTab=versions
+    cssLoader: "~7.1.2", // css-loader releases: https://github.com/webpack-contrib/css-loader/releases
+    styleLoader: "~4.0.0", // style-loader releases: https://github.com/webpack-contrib/style-loader/releases
 };
 
 /**
@@ -132,7 +132,6 @@ generatePackageJson("build-support", false, {
     dependencies: {
         electron: versions.electron,
         "@electron-forge/cli": versions.electronForge,
-        "@electron-forge/maker-dmg": versions.electronForge,
         "webpack-dev-server": versions.webpackDevServer,
         "html-webpack-plugin": versions.htmlWebpackPlugin,
         "ts-loader": versions.tsLoader,

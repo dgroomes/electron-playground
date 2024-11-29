@@ -50,15 +50,11 @@ Follow these instructions to build and run the app.
       ```
 5. Make the app distribution
     * ```shell
-      npm run make
+      npm run package
       ```
-  * You will then need to find the `.dmg` file in the `out` directory and install it.
-
-Rebuilding and re-installing `build-support` is a bit of a pain. Try this alias to make it easier:
-
-```shell
-alias rbs='cd build-support && npm install && npm run build && npm pack && cd .. && npm install --save-dev ./build-support/electron-playground_realistic_build-support-1.0.0.tgz'
-```
+    * The `*.app` distribution is in the `out/` directory.
+6. Install the app
+    * Move the `*.app` folder to your macOS `Applications/` directory.
 
 
 ## Instructions for React DevTools
@@ -105,6 +101,9 @@ General clean-ups, TODOs and things I wish to implement for this project:
 * [x] DONE (weird the problem went away; even when I blow away node_modules which is what was giving me falso negative last time) Try to add back the DMG maker using a workaround. 
 * [x] DONE Revisit pathing stuff one more time. A little less eval.
 * [x] DONE Upgrade version. I know the upgrade to Electron Forge 7.x will fail unfortunately so need to figure that out.
+* [x] DONE Remove DMG again and go back to ZIP. The optional dependency and Python thing I referenced earlier still is a
+  problem. I've encountered it again now that I'm on fresh macOS install. It is not worth papering over. Eject. Eject.
+  Eject.
 
 
 ## Finished Wish List Items

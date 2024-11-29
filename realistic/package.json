@@ -6,8 +6,7 @@
   "scripts": {
     "start": "DEBUG=true electron-forge start",
     "start:react-devtools": "ELECTRON_PLAYGROUND_CONNECT_TO_REACT_DEVTOOLS=true electron-forge start",
-    "package": "DEBUG=true electron-forge package",
-    "make": "electron-forge make"
+    "package": "DEBUG=true electron-forge package"
   },
   "license": "UNLICENSED",
   "dependencies": {
@@ -15,9 +14,9 @@
     "react-dom": "~18.2.0"
   },
   "devDependencies": {
-    "@types/react": "~18.2.46",
-    "@types/react-dom": "~18.2.18",
-    "electron": "~28.1.0",
+    "@types/react": "~18.3.12",
+    "@types/react-dom": "~18.3.1",
+    "electron": "~33.2.1",
     "electron-playground_realistic_build-support": "file:build-support/electron-playground_realistic_build-support-1.0.0.tgz"
   }
 }
